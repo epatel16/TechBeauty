@@ -1,31 +1,16 @@
 """
-TODO: Student name(s):
-TODO: Student email(s):
-TODO: High-level program overview
-
-******************************************************************************
-This is a template you may start with for your Final Project application.
-You may choose to modify it, or you may start with the example function
-stubs (most of which are incomplete).
-
-Some sections are provided as recommended program breakdowns, but are optional
-to keep, and you will probably want to extend them based on your application's
-features.
-
-TODO:
-- Make a copy of app-template.py to a more appropriately named file. You can
-  either use app.py or separate a client vs. admin interface with app_client.py,
-  app_admin.py (you can factor out shared code in a third file, which is
-  recommended based on submissions in 22wi).
-- For full credit, remove any irrelevant comments, which are included in the
-  template to help you get started. Replace this program overview with a
-  brief overview of your application as well (including your name/partners name).
-  This includes replacing everything in this *** section!
-******************************************************************************
+Student name(s): Eshani Patel, Rachael Kim
+Student email(s): ejpatel@caltech.edu, subinkim@caltech.edu
+High-level program overview
 """
-# TODO: Make sure you have these installed with pip3 if needed
 import sys  # to print error messages to sys.stderr
-import mysql.connector
+import os
+# check if mysql.connector is installed
+# if not, run pip3 install to install
+try:
+    import mysql.connector
+except ImportError as e:
+    os.system('pip3 install mysql.connector')
 # To get error codes from the connector, useful for user-friendly
 # error-handling
 import mysql.connector.errorcode as errorcode
