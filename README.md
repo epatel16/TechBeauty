@@ -1,4 +1,4 @@
-# :nail_polish: Cosmetics E-Commerce Project :nail_polish:
+# 💅 Cosmetics E-Commerce Project 💅
 For Caltech's CS 121 Final Project, we plan to develop an e-commerce application for cosmetics products and brands.
 
 ## :memo: Final Project Proposal :memo:
