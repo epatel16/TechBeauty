@@ -34,14 +34,12 @@ CREATE TABLE product (
 -- type for each product, identified by using either 0 or 1 for each
 -- skin preference.
 CREATE TABLE skin_preference (
-    product_id    INTEGER,
-    combination   TINYINT DEFAULT 0,
-    normal        TINYINT DEFAULT 0,
-    dry           TINYINT DEFAULT 0,
-    oily          TINYINT DEFAULT 0,
-    -- Corresponds to sensitive skin. 
-    -- Using 'sensitive' returns an error because it's a MySQL keyword.
-    sensit        TINYINT DEFAULT 0,
+    product_id       INTEGER,
+    is_combination   TINYINT DEFAULT 0,
+    is_normal        TINYINT DEFAULT 0,
+    is_dry           TINYINT DEFAULT 0,
+    is_oily          TINYINT DEFAULT 0,
+    is_sensit        TINYINT DEFAULT 0,
     PRIMARY KEY (product_id),
     FOREIGN KEY (product_id) REFERENCES product(product_id)
         ON UPDATE CASCADE ON DELETE CASCADE
