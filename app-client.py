@@ -23,7 +23,7 @@ DEBUG = True
 # ----------------------------------------------------------------------
 # SQL Utility Functions
 # ----------------------------------------------------------------------
-def get_conn():
+def get_conn(username, password):
     """"
     Returns a connected MySQL connector instance, if connection is successful.
     If unsuccessful, exits.
@@ -31,11 +31,11 @@ def get_conn():
     try:
         conn = mysql.connector.connect(
           host='localhost',
-          user='appadmin',
+          user=username,
           # Find port in MAMP or MySQL Workbench GUI or with
           # SHOW VARIABLES WHERE variable_name LIKE 'port';
           port='3306',  # this may change!
-          password='adminpw',
+          password=password,
           database='shelterdb' # replace this with your database name
         )
         print('Successfully connected.')
@@ -104,7 +104,6 @@ def show_options():
     sending a request to do <x>, etc.
     """
     print('What would you like to do? ')
-    print('  (TODO: provide command-line options)')
     print('  (x) - something nifty to do')
     print('  (x) - another nifty thing')
     print('  (x) - yet another nifty thing')
