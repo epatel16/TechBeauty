@@ -1,7 +1,7 @@
+DROP TABLE IF EXISTS store;
 DROP TABLE IF EXISTS cart;
-DROP TABLE IF EXISTS skin_preference;
-DROP TABLE IF EXISTS product;
 DROP TABLE IF EXISTS brand;
+DROP TABLE IF EXISTS product;
 DROP TABLE IF EXISTS user;
 
 -- Create Brand table, which contains information about
@@ -9,7 +9,7 @@ DROP TABLE IF EXISTS user;
 CREATE TABLE brand (
     -- brand_id is formatted in the following way: BRx
     -- where x is a number from 1 to 116.
-    brand_id    VARCHAR(5),
+    brand_id    INTEGER,
     brand_name  VARCHAR(100) NOT NULL,
     PRIMARY KEY (brand_id)
 );
@@ -17,30 +17,28 @@ CREATE TABLE brand (
 -- Create Product table, which contains information about
 CREATE TABLE product (
     product_id      INTEGER,
-    brand_id        VARCHAR(5),
     product_name    VARCHAR(200) NOT NULL,
     product_type    VARCHAR(50),
     ingredients     TEXT,
     price           DECIMAL(10,2) CHECK (price >= 0),
-    -- Starting inventory is a randomly generated number
-    -- between 10 and 120
-    inventory       INTEGER,
     rating          DECIMAL(3,2) CHECK (rating >= 0 AND rating <= 5),
-    PRIMARY KEY (product_id, brand_id),
-    FOREIGN KEY (brand_id) REFERENCES brand(brand_id)
-);
-
--- Create Skin Preference table, which contains the skin preference
--- type for each product, identified by using either 0 or 1 for each
--- skin preference.
-CREATE TABLE skin_preference (
-    product_id       INTEGER,
     is_combination   TINYINT DEFAULT 0,
     is_normal        TINYINT DEFAULT 0,
     is_dry           TINYINT DEFAULT 0,
     is_oily          TINYINT DEFAULT 0,
     is_sensit        TINYINT DEFAULT 0,
-    PRIMARY KEY (product_id),
+    PRIMARY KEY (product_id)
+);
+
+-- Create store table that keeps an inventory of each product 
+-- from each brand
+CREATE TABLE store (
+    brand_id CHAR(3),
+    product_id CHAR(5),
+    inventory INTEGER,
+    PRIMARY KEY (brand_id, product_id),
+    FOREIGN KEY (brand_id) REFERENCES brand(brand_id)
+        ON UPDATE CASCADE ON DELETE CASCADE,
     FOREIGN KEY (product_id) REFERENCES product(product_id)
         ON UPDATE CASCADE ON DELETE CASCADE
 );
