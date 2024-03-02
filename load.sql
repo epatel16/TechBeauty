@@ -7,5 +7,5 @@ LOAD DATA LOCAL INFILE 'data/products.csv' INTO TABLE product
 FIELDS TERMINATED BY ',' ENCLOSED BY '"' LINES TERMINATED BY '\n' IGNORE 1 ROWS;
 
 -- skin_preference csv loading
-LOAD DATA LOCAL INFILE 'data/skin_preferences.csv' INTO TABLE skin_preference
+LOAD DATA LOCAL INFILE 'data/stores.csv' INTO TABLE store
 FIELDS TERMINATED BY ',' ENCLOSED BY '"' LINES TERMINATED BY '\n' IGNORE 1 ROWS;
