@@ -20,11 +20,16 @@ CREATE TABLE product (
     ingredients     TEXT,
     price           DECIMAL(10,2) CHECK (price >= 0),
     rating          DECIMAL(3,2) CHECK (rating >= 0 AND rating <= 5),
-    is_combination  TINYINT DEFAULT 0,
-    is_dry          TINYINT DEFAULT 0,
-    is_normal       TINYINT DEFAULT 0,
-    is_oily         TINYINT DEFAULT 0,
-    is_sensitive    TINYINT DEFAULT 0,
+    is_combination  TINYINT DEFAULT 0 
+                    CHECK (is_combination = 0 OR is_combination = 1),
+    is_dry          TINYINT DEFAULT 0
+                    CHECK (is_dry = 0 OR is_dry = 1),
+    is_normal       TINYINT DEFAULT 0
+                    CHECK (is_normal = 0 OR is_normal = 1),
+    is_oily         TINYINT DEFAULT 0
+                    CHECK (is_oily = 0 OR is_oily = 1),
+    is_sensitive    TINYINT DEFAULT 0
+                    CHECK (is_sensitive = 0 OR is_sensitive = 1),
     PRIMARY KEY (product_id)
 );
 
