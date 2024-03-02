@@ -7,8 +7,6 @@ DROP TABLE IF EXISTS user;
 -- Create Brand table, which contains information about
 -- information about each brand on the store
 CREATE TABLE brand (
-    -- brand_id is formatted in the following way: BRx
-    -- where x is a number from 1 to 116.
     brand_id    INTEGER,
     brand_name  VARCHAR(100) NOT NULL,
     PRIMARY KEY (brand_id)
