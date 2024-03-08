@@ -1,0 +1,2 @@
+-- This is a small file to set up MySQL users with different privileges using GRANT statements, 
+-- referring to the client and admin user(s) you identified in the Project Proposal.
