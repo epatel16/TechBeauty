@@ -10,7 +10,7 @@ import os
 try:
     import mysql.connector
 except ImportError as e:
-    os.system('pip3 install mysql.connector')
+    os.system('pip3 install mysql-connector-python')
 # To get error codes from the connector, useful for user-friendly
 # error-handling
 import mysql.connector.errorcode as errorcode
@@ -23,7 +23,8 @@ DEBUG = True
 # ----------------------------------------------------------------------
 # SQL Utility Functions
 # ----------------------------------------------------------------------
-def get_conn(username, password):
+# TODO: we can work on adding username/password input feature
+def get_conn():
     """"
     Returns a connected MySQL connector instance, if connection is successful.
     If unsuccessful, exits.
@@ -31,12 +32,12 @@ def get_conn(username, password):
     try:
         conn = mysql.connector.connect(
           host='localhost',
-          user=username,
+          user='client', # TODO: maybe take username input?
           # Find port in MAMP or MySQL Workbench GUI or with
           # SHOW VARIABLES WHERE variable_name LIKE 'port';
           port='3306',  # this may change!
-          password=password,
-          database='shelterdb' # replace this with your database name
+          password='clientpwd',
+          database='cosmeticsdb' # replace this with your database name
         )
         print('Successfully connected.')
         return conn
@@ -159,5 +160,7 @@ if __name__ == '__main__':
     # This conn is a global object that other functions can access.
     # You'll need to use cursor = conn.cursor() each time you are
     # about to execute a query with cursor.execute(<sqlquery>)
+    # username = input("Your MySQL username: ")
+    # password = input("Your MySQL password: ")
     conn = get_conn()
     main()
