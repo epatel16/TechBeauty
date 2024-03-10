@@ -52,7 +52,7 @@ CREATE TABLE store (
 CREATE TABLE user (
     user_id     INTEGER AUTO_INCREMENT,
     username    VARCHAR(15) NOT NULL,
-    password    VARCHAR(20) NOT NULL,
+    pwd    VARCHAR(20) NOT NULL,
     PRIMARY KEY (user_id)
 );
 
