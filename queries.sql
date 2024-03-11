@@ -1,23 +1,28 @@
 -- Retrieve all products with their brand names
-SELECT product_id, product_name, brand_name
-FROM product NATURAL JOIN brand_name;
+SELECT product_name, brand_name
+FROM product NATURAL JOIN store NATURAL JOIN brand;
 
--- Find products with a specific type
-SELECT * FROM product WHERE product_type = 'Lipstick';
+-- Find products with a specific type 
+-- change product_type with input to query for desired type
+SELECT product_name, product_type, price FROM product WHERE product_type = 'Moisturizer';
 
 -- Get the total inventory count for each product in the store
-SELECT product_id, product_name, SUM(inventory) AS total_inventory
+SELECT product_name, SUM(inventory) AS total_inventory
 FROM product NATURAL JOIN store
 GROUP BY product_id, product_name;
 
 -- Retrieve products with a certain rating range
-SELECT * FROM product WHERE rating BETWEEN 3.0 AND 4.5;
+SELECT product_name, price, rating FROM product WHERE rating BETWEEN 3.0 AND 4.5;
 
 -- Find products suitable for oily skin
-SELECT * FROM product WHERE is_oily = 1;
+SELECT product_name, product_type, price FROM product WHERE is_oily = 1;
 
 -- Get the top-rated products
-SELECT * FROM product ORDER BY rating DESC LIMIT 20;
+SELECT product_name, price, rating FROM product ORDER BY rating DESC LIMIT 20;
+
+-- Get the all products prices low to high
+SELECT product_name, product_type, price, rating FROM product 
+WHERE price < 25 ORDER BY price ASC;
 
 -- Retrieve users and their respective shopping carts
 SELECT username, product_id, product_name, num_items
