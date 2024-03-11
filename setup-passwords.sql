@@ -29,20 +29,20 @@ DELIMITER ;
 -- You may extend that table to include an is_admin or role attribute if you
 -- have admin or other roles for users in your application
 -- (e.g. store managers, data managers, etc.)
-CREATE TABLE user_info (
-    -- Usernames are up to 20 characters.
-    username VARCHAR(20) PRIMARY KEY,
+-- CREATE TABLE user_info (
+--     -- Usernames are up to 20 characters.
+--     username VARCHAR(20) PRIMARY KEY,
 
-    -- Salt will be 8 characters all the time, so we can make this 8.
-    salt CHAR(8) NOT NULL,
+--     -- Salt will be 8 characters all the time, so we can make this 8.
+--     salt CHAR(8) NOT NULL,
 
-    -- We use SHA-2 with 256-bit hashes.  MySQL returns the hash
-    -- value as a hexadecimal string, which means that each byte is
-    -- represented as 2 characters.  Thus, 256 / 8 * 2 = 64.
-    -- We can use BINARY or CHAR here; BINARY simply has a different
-    -- definition for comparison/sorting than CHAR.
-    password_hash BINARY(64) NOT NULL
-);
+--     -- We use SHA-2 with 256-bit hashes.  MySQL returns the hash
+--     -- value as a hexadecimal string, which means that each byte is
+--     -- represented as 2 characters.  Thus, 256 / 8 * 2 = 64.
+--     -- We can use BINARY or CHAR here; BINARY simply has a different
+--     -- definition for comparison/sorting than CHAR.
+--     password_hash BINARY(64) NOT NULL
+-- );
 
 -- [Problem 1a]
 -- Adds a new user to the user_info table, using the specified password (max
