@@ -5,12 +5,13 @@ High-level program overview
 """
 import sys  # to print error messages to sys.stderr
 import os
+import mysql.connector
 # check if mysql.connector is installed
 # if not, run pip3 install to install
-try:
-    import mysql.connector
-except ImportError as e:
-    os.system('pip3 install mysql-connector-python')
+# try:
+#     import mysql.connector
+# except ImportError as e:
+#     os.system('pip3 install mysql-connector-python')
 # To get error codes from the connector, useful for user-friendly
 # error-handling
 import mysql.connector.errorcode as errorcode
@@ -60,12 +61,171 @@ def get_conn():
 # ----------------------------------------------------------------------
 # Functions for Command-Line Options/Query Execution
 # ----------------------------------------------------------------------
-def example_query():
-    param1 = ''
+def browse_products(*args):
+    cursor = conn.cursor()
+    if len(args) == 0:
+        sql = 'SELECT product_id, brand_name, product_name, product_type, rating FROM product \
+            NATURAL JOIN store NATURAL JOIN brand;'
+    try:
+        cursor.execute(args[0])
+        rows = cursor.fetchall()
+        if cursor.rowcount == 0:
+            print("Your query returned no result.")
+            show_options()
+        else:
+            for (product_id, brand_name, product_name, product_type, rating) in rows:
+                print("{0:04d} | {brand_name:30s} | {product_name:30s} | {product_type:15s} | {rating:.1f}"
+                    .format(product_id, brand_name, product_name, product_type, rating))
+    except mysql.connector.Error as err:
+        # If you're testing, it's helpful to see more details printed.
+        if DEBUG:
+            sys.stderr(err)
+            sys.exit(1)
+        else:
+            sys.stderr('ERROR: unable to fetch all products..')
+    return None
+
+def handle_brand():
+    cursor = conn.cursor()
+    sql = 'SELECT brand_id, brand_name FROM brand;'
+    try:
+        cursor.execute(sql)
+        rows = cursor.fetchall()
+        print("Choose the brand you want: ")
+        for (brand_id, brand_name) in rows:
+            print(f"    ({brand_id}){brand_name}")
+        ans = input("Enter your option: ")
+        browse_products(f"WHERE brand_id = {ans}")
+    except mysql.connector.Error as err:
+        # If you're testing, it's helpful to see more details printed.
+        if DEBUG:
+            sys.stderr(err)
+            sys.exit(1)
+        else:
+            sys.std
+
+def handle_skintype():
+    print("What is your skin type?")
+    print("    (a) combination")
+    print("    (b) dry")
+    print("    (c) oily")
+    print("    (d) sensitive")
+    ans = input("Enter an option: ").lower()
+    query = ''
+    if ans == "a":
+        query = 'WHERE is_combination = 1'
+    elif ans == "b":
+        query = 'WHERE is_dry = 1'
+    elif ans == "c":
+        query = "WHERE is_oily = 1"
+    elif ans == "d":
+        query = "WHERE is_sensitive = 1"
+    sql = 'SELECT product_id, brand_name, product_name, product_type, rating FROM product \
+            NATURAL JOIN store NATURAL JOIN brand \'%s\';' % (query)
+    browse_products(sql)
+
+def handle_product_type():
+    print("Choose the type of product you want to browse: ")
+    print("    (a) Moisturizer")
+    print("    (b) Cleanser")
+    print("    (c) Treatment")
+    print("    (d) Face Mask")
+    print("    (e) Eye cream")
+    print("    (f) Sun protect")
+    ans = input("Enter your option: ").lower()
+    valid = "abcdef"
+    query = ''
+    if ans not in valid:
+        print("Invalid input. Re-enter.")
+        handle_product_type()
+    elif ans == "a":
+        query = 'Moisturizer'
+    elif ans == "b":
+        query = 'Cleanser'
+    elif ans == "c":
+        query = 'Treatment'
+    elif ans == "d":
+        query = 'Face Mask'
+    elif ans == "e":
+        query = 'Eye cream'
+    elif ans == "f":
+        query = "Sun protect"
+    sql = 'SELECT product_id, brand_name, product_name, product_type, rating FROM product \
+            NATURAL JOIN store NATURAL JOIN brand WHERE product_type = \'%s\';' % (query)
+    browse_products(sql)
+
+def handle_price():
+    print("Choose your price range: ")
+    print("    (a) Under $10")
+    print("    (b) $10 - $50")
+    print("    (c) $50 - $75")
+    print("    (d) $75 - $100")
+    print("    (e) $100 +")
+    ans = input("Enter an option: ").lower()
+    valid = "abcde"
+    query = ""
+    if ans not in valid:
+        print("Invalid input! Would you like to see the list of all products? \
+              (y) for yes and other keys for no.")
+        ans = input("Enter an option: ").lower()
+        if ans == "y":
+            browse_products()
+        else:
+            filter_products()
+    elif ans == "a":
+        query = "WHERE price < 10"
+    elif ans == "b":
+        query = "WHERE price < 50 AND price >= 10"
+    elif ans == "c":
+        query = "WHERE price < 75 AND price >= 50"
+    elif ans == "d":
+        query = "WHERE price < 100 AND price >= 75"
+    elif ans == "e":
+        query = "WHERE price >= 100"
+    sql = 'SELECT product_id, brand_name, product_name, product_type, rating FROM product \
+            NATURAL JOIN store NATURAL JOIN brand WHERE product_type = \'%s\';' % (query)
+    browse_products(sql)
+
+def filter_products():
+    print("What do you want to filter your product on?")
+    print("    (b) brand name")
+    print("    (s) skin type")
+    print("    (p) product type")
+    print("    (e) price range")
+    print("    (r) rating")
+    ans = input("Enter an option: ").lower()
+    if ans == "b":
+        handle_brand()
+    elif ans == "s":
+        handle_skintype()
+    elif ans == "p":
+        handle_product_type()
+    elif ans == "e":
+        handle_price()
+    elif ans == "r":
+        handle_price()
+    else:
+        print("Invalid input! Would you like to see the list of all products? (y) for yes and other keys for no.")
+        ans = input("Enter an option: ").lower()
+        if ans == "y":
+            browse_products()
+        else:
+            filter_products()
+    
+
+# ----------------------------------------------------------------------
+# Functions for Logging Users In
+# ----------------------------------------------------------------------
+# Note: There's a distinction between database users (admin and client)
+# and application users (e.g. members registered to a store). You can
+# choose how to implement these depending on whether you have app.py or
+# app-client.py vs. app-admin.py (in which case you don't need to
+# support any prompt functionality to conditionally login to the sql database)
+def login():
     cursor = conn.cursor()
     # Remember to pass arguments as a tuple like so to prevent SQL
     # injection.
-    sql = 'SELECT col1 FROM table WHERE col2 = \'%s\';' % (param1, )
+    sql = 'SELECT brand_name, product_name, product_type FROM product NATURAL JOIN store NATURAL JOIN brand;'
     try:
         cursor.execute(sql)
         # row = cursor.fetchone()
@@ -79,21 +239,27 @@ def example_query():
             sys.stderr(err)
             sys.exit(1)
         else:
-            # TODO: Please actually replace this :) 
-            sys.stderr('An error occurred, give something useful for clients...')
+            sys.stderr('ERROR: unable to fetch all products..')
 
-
-
-# ----------------------------------------------------------------------
-# Functions for Logging Users In
-# ----------------------------------------------------------------------
-# Note: There's a distinction between database users (admin and client)
-# and application users (e.g. members registered to a store). You can
-# choose how to implement these depending on whether you have app.py or
-# app-client.py vs. app-admin.py (in which case you don't need to
-# support any prompt functionality to conditionally login to the sql database)
-
-
+def signup():
+    cursor = conn.cursor()
+    # Remember to pass arguments as a tuple like so to prevent SQL
+    # injection.
+    sql = 'SELECT brand_name, product_name, product_type FROM product NATURAL JOIN store NATURAL JOIN brand;'
+    try:
+        cursor.execute(sql)
+        # row = cursor.fetchone()
+        rows = cursor.fetchall()
+        for row in rows:
+            (col1val) = (row) # tuple unpacking!
+            # do stuff with row data
+    except mysql.connector.Error as err:
+        # If you're testing, it's helpful to see more details printed.
+        if DEBUG:
+            sys.stderr(err)
+            sys.exit(1)
+        else:
+            sys.stderr('ERROR: unable to fetch all products..')
 # ----------------------------------------------------------------------
 # Command-Line Functionality
 # ----------------------------------------------------------------------
@@ -105,40 +271,26 @@ def show_options():
     sending a request to do <x>, etc.
     """
     print('What would you like to do? ')
-    print('  (x) - something nifty to do')
-    print('  (x) - another nifty thing')
-    print('  (x) - yet another nifty thing')
-    print('  (x) - more nifty things!')
+    print('  (a) - see all products')
+    print('  (f) - filter products')
+    print('  (l) - login to your account')
+    print('  (s) - sign up for an account')
     print('  (q) - quit')
     print()
     ans = input('Enter an option: ').lower()
     if ans == 'q':
         quit_ui()
-    elif ans == '':
-        pass
-
-
-# Another example of where we allow you to choose to support admin vs. 
-# client features  in the same program, or
-# separate the two as different app_client.py and app_admin.py programs 
-# using the same database.
-def show_admin_options():
-    """
-    Displays options specific for admins, such as adding new data <x>,
-    modifying <x> based on a given id, removing <x>, etc.
-    """
-    print('What would you like to do? ')
-    print('  (x) - something nifty for admins to do')
-    print('  (x) - another nifty thing')
-    print('  (x) - yet another nifty thing')
-    print('  (x) - more nifty things!')
-    print('  (q) - quit')
-    print()
-    ans = input('Enter an option: ').lower()
-    if ans == 'q':
-        quit_ui()
-    elif ans == '':
-        pass
+    elif ans == 'a':
+        browse_products()
+    elif ans == 'f':
+        filter_products()
+    elif ans == 'l':
+        login()
+    elif ans == 's':
+        signup()
+    else:
+        print("Error: invalid input for option. Please choose from the given set of options.")
+        show_options()
 
 
 def quit_ui():
