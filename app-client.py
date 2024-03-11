@@ -20,6 +20,11 @@ import mysql.connector.errorcode as errorcode
 # to an actual client. ***Set to False when done testing.***
 DEBUG = True
 
+# to keep track of whether the user is logged in or not
+system_var = {
+    "loggedin": False,
+    "username": ""
+}
 
 # ----------------------------------------------------------------------
 # SQL Utility Functions
@@ -33,11 +38,12 @@ def get_conn():
     try:
         conn = mysql.connector.connect(
           host='localhost',
-          user='client', # TODO: maybe take username input?
+          # TODO: change this
+          user='admin', # TODO: maybe take username input?
           # Find port in MAMP or MySQL Workbench GUI or with
           # SHOW VARIABLES WHERE variable_name LIKE 'port';
           port='3306',  # this may change!
-          password='clientpwd',
+          password='adminpwd',
           database='cosmeticsdb' # replace this with your database name
         )
         print('Successfully connected.')
@@ -61,21 +67,23 @@ def get_conn():
 # ----------------------------------------------------------------------
 # Functions for Command-Line Options/Query Execution
 # ----------------------------------------------------------------------
-def browse_products(*args):
+def browse_products(sql = ''):
     cursor = conn.cursor()
-    if len(args) == 0:
-        sql = 'SELECT product_id, brand_name, product_name, product_type, rating FROM product \
-            NATURAL JOIN store NATURAL JOIN brand;'
+    sql = 'SELECT product_id, brand_name, product_name, product_type, rating FROM product \
+            NATURAL JOIN store NATURAL JOIN brand %s;' % sql
     try:
-        cursor.execute(args[0])
+        cursor.execute(sql)
         rows = cursor.fetchall()
         if cursor.rowcount == 0:
             print("Your query returned no result.")
             show_options()
         else:
+            print("-----------------------------------------------------------------------------------------------------------------------------")
             for (product_id, brand_name, product_name, product_type, rating) in rows:
-                print("{0:04d} | {brand_name:30s} | {product_name:30s} | {product_type:15s} | {rating:.1f}"
-                    .format(product_id, brand_name, product_name, product_type, rating))
+                print(f"{product_id} {brand_name}")
+                print("{product_name:100s} | {product_type:15s} | {rating:.1f}"
+                    .format(product_name=product_name, product_type=product_type, rating=rating))
+                print("-----------------------------------------------------------------------------------------------------------------------------")
     except mysql.connector.Error as err:
         # If you're testing, it's helpful to see more details printed.
         if DEBUG:
@@ -94,15 +102,17 @@ def handle_brand():
         print("Choose the brand you want: ")
         for (brand_id, brand_name) in rows:
             print(f"    ({brand_id}){brand_name}")
-        ans = input("Enter your option: ")
-        browse_products(f"WHERE brand_id = {ans}")
+        ans = input("Enter your option: ").lower()
+        sql = f"WHERE brand_id = {ans}"
+        browse_products(sql)
     except mysql.connector.Error as err:
         # If you're testing, it's helpful to see more details printed.
         if DEBUG:
             sys.stderr(err)
             sys.exit(1)
         else:
-            sys.std
+            sys.stderr('ERROR: unable to get the list of all brands')
+    return None
 
 def handle_skintype():
     print("What is your skin type?")
@@ -120,9 +130,7 @@ def handle_skintype():
         query = "WHERE is_oily = 1"
     elif ans == "d":
         query = "WHERE is_sensitive = 1"
-    sql = 'SELECT product_id, brand_name, product_name, product_type, rating FROM product \
-            NATURAL JOIN store NATURAL JOIN brand \'%s\';' % (query)
-    browse_products(sql)
+    browse_products(query)
 
 def handle_product_type():
     print("Choose the type of product you want to browse: ")
@@ -150,9 +158,7 @@ def handle_product_type():
         query = 'Eye cream'
     elif ans == "f":
         query = "Sun protect"
-    sql = 'SELECT product_id, brand_name, product_name, product_type, rating FROM product \
-            NATURAL JOIN store NATURAL JOIN brand WHERE product_type = \'%s\';' % (query)
-    browse_products(sql)
+    browse_products(query)
 
 def handle_price():
     print("Choose your price range: ")
@@ -182,9 +188,7 @@ def handle_price():
         query = "WHERE price < 100 AND price >= 75"
     elif ans == "e":
         query = "WHERE price >= 100"
-    sql = 'SELECT product_id, brand_name, product_name, product_type, rating FROM product \
-            NATURAL JOIN store NATURAL JOIN brand WHERE product_type = \'%s\';' % (query)
-    browse_products(sql)
+    browse_products(query)
 
 def filter_products():
     print("What do you want to filter your product on?")
@@ -192,7 +196,6 @@ def filter_products():
     print("    (s) skin type")
     print("    (p) product type")
     print("    (e) price range")
-    print("    (r) rating")
     ans = input("Enter an option: ").lower()
     if ans == "b":
         handle_brand()
@@ -201,8 +204,6 @@ def filter_products():
     elif ans == "p":
         handle_product_type()
     elif ans == "e":
-        handle_price()
-    elif ans == "r":
         handle_price()
     else:
         print("Invalid input! Would you like to see the list of all products? (y) for yes and other keys for no.")
@@ -225,45 +226,72 @@ def login():
     cursor = conn.cursor()
     # Remember to pass arguments as a tuple like so to prevent SQL
     # injection.
-    sql = 'SELECT brand_name, product_name, product_type FROM product NATURAL JOIN store NATURAL JOIN brand;'
+    print("Enter your credentials.")
+    username = input("What is your username: ").lower()
+    password = input("What is your password: ").lower()
+    func = "SELECT authenticate(%s, %s);"
     try:
-        cursor.execute(sql)
-        # row = cursor.fetchone()
-        rows = cursor.fetchall()
-        for row in rows:
-            (col1val) = (row) # tuple unpacking!
-            # do stuff with row data
+        cursor.execute(func, (username, password))
+        rows = cursor.fetchone()
+        if cursor.rowcount == 0:
+            print("Unable to authenticate the user. Start using our service by signing up:")
+            signup()
+        else:
+            system_var["loggedin"] = True
+            system_var["username"] = username
+            print("Successully signed you in!")
+            show_mod_options()
     except mysql.connector.Error as err:
         # If you're testing, it's helpful to see more details printed.
         if DEBUG:
             sys.stderr(err)
             sys.exit(1)
         else:
-            sys.stderr('ERROR: unable to fetch all products..')
+            sys.stderr('ERROR: unable to log user in..')
+
+def check_username(username):
+    cursor = conn.cursor()
+    # Remember to pass arguments as a tuple like so to prevent SQL
+    # injection.
+    sql = "SELECT * FROM user_info WHERE username = \'%s\';" % username
+    try:
+        cursor.execute(sql)
+        return cursor.rowcount == 1
+    except mysql.connector.Error as err:
+        # If you're testing, it's helpful to see more details printed.
+        if DEBUG:
+            sys.stderr(err)
+            sys.exit(1)
+        else:
+            sys.stderr('ERROR: unable to check if user exists..')
 
 def signup():
     cursor = conn.cursor()
     # Remember to pass arguments as a tuple like so to prevent SQL
     # injection.
-    sql = 'SELECT brand_name, product_name, product_type FROM product NATURAL JOIN store NATURAL JOIN brand;'
+    print("Let's create your account!")
+    username = input("What would you want your username to be: ")
+    password = input("And your password?: ")
+    while check_username(username):
+        username = input("Username is already taken! Choose a different username: ")
+        password = input("And password: ")
+    sql = "CALL sp_add_user(%s, %s);"
     try:
-        cursor.execute(sql)
-        # row = cursor.fetchone()
-        rows = cursor.fetchall()
-        for row in rows:
-            (col1val) = (row) # tuple unpacking!
-            # do stuff with row data
+        cursor.execute(sql, (username, password))
+        cursor.commit()
+        system_var["loggedin"] = True
+        system_var["username"] = username
+        show_mod_options()
     except mysql.connector.Error as err:
         # If you're testing, it's helpful to see more details printed.
         if DEBUG:
             sys.stderr(err)
             sys.exit(1)
         else:
-            sys.stderr('ERROR: unable to fetch all products..')
+            sys.stderr('ERROR: unable to add a new user..')
 # ----------------------------------------------------------------------
 # Command-Line Functionality
 # ----------------------------------------------------------------------
-# TODO: Please change these!
 def show_options():
     """
     Displays options users can choose in the application, such as
@@ -292,6 +320,28 @@ def show_options():
         print("Error: invalid input for option. Please choose from the given set of options.")
         show_options()
 
+# this is only for users who have already logged in
+def show_mod_options():
+    """
+    Displays options users can choose in the application, such as
+    viewing <x>, filtering results with a flag (e.g. -s to sort),
+    sending a request to do <x>, etc.
+    """
+    print('What would you like to do? ')
+    print('  (a) - see all products')
+    print('  (f) - filter products')
+    print('  (q) - quit')
+    print()
+    ans = input('Enter an option: ').lower()
+    if ans == 'q':
+        quit_ui()
+    elif ans == 'a':
+        browse_products()
+    elif ans == 'f':
+        filter_products()
+    else:
+        print("Error: invalid input for option. Please choose from the given set of options.")
+        show_mod_options()
 
 def quit_ui():
     """
