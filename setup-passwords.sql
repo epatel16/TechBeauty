@@ -44,7 +44,6 @@ DELIMITER ;
 --     password_hash BINARY(64) NOT NULL
 -- );
 
--- [Problem 1a]
 -- Adds a new user to the user_info table, using the specified password (max
 -- of 20 characters). Salts the password with a newly-generated salt value,
 -- and then the salt and hash values are both stored in the table.
@@ -68,7 +67,6 @@ BEGIN
 END !
 DELIMITER ;
 
--- [Problem 1b]
 -- Authenticates the specified username and password against the data
 -- in the user_info table.  Returns 1 if the user appears in the table, and the
 -- specified password hashes to the value for the user. Otherwise returns 0.
@@ -105,13 +103,6 @@ BEGIN
 END !
 DELIMITER ;
 
--- [Problem 1c]
--- Add at least two users into your user_info table so that when we run this file,
--- we will have examples users in the database.
-CALL sp_add_user('Eshani', 'bball4life12!');
-CALL sp_add_user('Saumya', 'basketball30.');
-
--- [Problem 1d]
 -- Create a procedure sp_change_password to generate a new salt and change the given
 -- user's password to the given password (after salting and hashing)
 DELIMITER !

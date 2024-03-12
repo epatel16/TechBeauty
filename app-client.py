@@ -233,7 +233,7 @@ def login():
     try:
         cursor.execute(func, (username, password))
         rows = cursor.fetchone()
-        if cursor.rowcount == 0:
+        if cursor.rowcount == 0 or rows[0] == 0:
             print("Unable to authenticate the user. Start using our service by signing up:")
             signup()
         else:
@@ -256,6 +256,7 @@ def check_username(username):
     sql = "SELECT * FROM user_info WHERE username = \'%s\';" % username
     try:
         cursor.execute(sql)
+        _ = cursor.fetchall()
         return cursor.rowcount == 1
     except mysql.connector.Error as err:
         # If you're testing, it's helpful to see more details printed.
@@ -278,7 +279,7 @@ def signup():
     sql = "CALL sp_add_user(%s, %s);"
     try:
         cursor.execute(sql, (username, password))
-        cursor.commit()
+        conn.commit()
         system_var["loggedin"] = True
         system_var["username"] = username
         show_mod_options()
