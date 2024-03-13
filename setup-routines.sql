@@ -1,15 +1,15 @@
 -- UDF
 -- Function to calculate the total value of inventory based on price and quantity
-CREATE FUNCTION calculate_inventory_value(
-    p_price DECIMAL,
-    p_quantity DECIMAL)
+CREATE FUNCTION calculate_inventory_value(prod_id INTEGER)
 RETURNS DECIMAL
 BEGIN
-    DECLARE total_value DECIMAL;
-    
-    SET total_value = p_price * p_quantity;
-    
-    RETURN total_value;
+    DECLARE totalInventoryPrice DECIMAL(10,2);
+
+    SELECT SUM(price * inventory) INTO totalInventoryPrice
+    FROM product NATURAL JOIN store
+    WHERE product_id = prod_id;
+
+    RETURN totalInventoryPrice;
 END;
 
 

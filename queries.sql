@@ -36,3 +36,29 @@ WHERE product_name = 'Water Sleeping Mask';
 -- Get the number of products in each product type
 SELECT product_type, COUNT(*) AS num_products
 FROM product GROUP BY product_type;
+
+-- INSERT QUERIES FOR ADMIN
+-- Insert data into the brand table for a new brand
+INSERT INTO brand (brand_id, brand_name)
+VALUES (1, 'NewBrand'); -- Replace with the actual brand name
+
+-- Insert data into the product table for a new product
+INSERT INTO product (product_id, product_name, product_type, ingredients, price,
+ rating, is_combination, is_dry, is_normal, is_oily, is_sensitive)
+VALUES (
+    1,                -- Replace with the actual product_id
+    'NewProduct',     -- Replace 'NewProduct' with the actual product name
+    'Type',           -- Replace 'Type' with the actual product type
+    'Ingredient1, Ingredient2',  -- Replace with the actual ingredients
+    19.99,            -- Replace with the actual price
+    4.5,              -- Replace with the actual rating
+    1,                -- Replace with 1 or 0 for is_combination
+    0,                -- Replace with 1 or 0 for is_dry
+    1,                -- Replace with 1 or 0 for is_normal
+    0,                -- Replace with 1 or 0 for is_oily
+    0                 -- Replace with 1 or 0 for is_sensitive
+);
+
+-- Insert data into the store table for the new product and brand
+INSERT INTO store (brand_id, product_id, inventory)
+VALUES (1, 1, 50); -- Replace with the actual brand_id, product_id, and inventory quantity
