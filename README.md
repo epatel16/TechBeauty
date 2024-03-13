@@ -4,6 +4,11 @@ For Caltech's CS 121 Final Project, we plan to develop an e-commerce application
 ## :memo: Final Project Proposal :memo:
 Here's the link to our Final Project Proposal: [Final Project Proposal](https://docs.google.com/document/d/1-SiWRTnO7FuUWw8p5J6z06Gr7R1Q0K7K66yuXgOf-pE/edit?usp=sharing)
 
+## How to run our code
+- setup.sql, load.sql, grant-permissions.sql, setup-passwords.sql, setup-routines.sql
+- `pip3 install requirements.txt`
+- inside webClientInterface, run `flask --app app run`
+
 ## Application Description
 
 
