@@ -1,0 +1,74 @@
+/**************/
+/* index.html */
+/**************/
+
+/* Nav Bar */
+.filters{
+    background-color: #fce3d9;
+}
+
+/* Main Image */
+#imageJumbo{
+    padding: 0px;
+    img {
+        width: 100%
+    };
+    position: relative;
+    text-align: center;
+}
+
+.centered {
+    position: absolute;
+    top: 80%;
+    left: 63%;
+    transform: translate(-50%, -50%);
+}
+
+/* login.html */
+#loginBox{
+    font-family: 'Lato',Arial, sans-serif;
+    margin-top: 10%;
+    margin-bottom:10%;
+    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+    .form-group{
+        margin-bottom:20px;
+    };
+    img{
+        width: 100%;
+    };
+    a{
+        text-decoration: none;
+        color: #faaf9c;
+    };
+    a:hover{
+        text-decoration: underline;
+    };
+    #forgot{
+        float: right;
+    };
+    button{
+        background-color: #faaf9c;
+        border: 0px;
+    }
+}
+
+/* brands.html */
+#brandContainer {
+    width: 70%;
+    margin-top:2%;
+    margin-bottom:2%;
+    table > th:hover{
+        background-color: grey;
+    }
+}
+
+/* products.html */
+#productContainer {
+    width: 70%;
+    margin-top:2%;
+    margin-bottom:2%;
+    a{
+        text-decoration: none;
+        color: black;
+    }
+}

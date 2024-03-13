@@ -38,12 +38,11 @@ def get_conn():
     try:
         conn = mysql.connector.connect(
           host='localhost',
-          # TODO: change this
-          user='admin', # TODO: maybe take username input?
+          user='client', # TODO: maybe take username input?
           # Find port in MAMP or MySQL Workbench GUI or with
           # SHOW VARIABLES WHERE variable_name LIKE 'port';
           port='3306',  # this may change!
-          password='adminpwd',
+          password='clientpwd',
           database='cosmeticsdb' # replace this with your database name
         )
         print('Successfully connected.')
@@ -67,6 +66,12 @@ def get_conn():
 # ----------------------------------------------------------------------
 # Functions for Command-Line Options/Query Execution
 # ----------------------------------------------------------------------
+# def add_to_cart(product_id):
+#     print("Would you like to add any item to the cart?")
+#     input = ("Enter (y) for yes, any other key for no: ").lower()
+#     while input == "y":
+
+
 def browse_products(sql = ''):
     cursor = conn.cursor()
     sql = 'SELECT product_id, brand_name, product_name, product_type, rating FROM product \

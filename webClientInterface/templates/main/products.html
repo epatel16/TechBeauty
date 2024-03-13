@@ -1,0 +1,76 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Calphora
+{% endblock %}
+
+{% block script %}
+<script>
+    $(document).ready(function(){
+      $("#searchInput").on("keyup", function() {
+        var value = $(this).val().toLowerCase();
+        $("#productList tbody tr").filter(function() {
+          $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
+        });
+      });
+    });
+</script>
+
+{% endblock %}
+
+{% block head %}
+
+{% endblock %}
+
+{% block body %}
+    <div class="container" id="productContainer">
+        <!-- Filters for customers -->
+        <div class="w-100 p-3" id="filters">
+            <form>
+                <div class="form-group">
+                    <select class="form-control">
+                        <option value=-1>Select brand</option>
+                        {% for brand in brands %}
+                        <option value={{ brand.brand_id }}>{{ brand.brand_name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="form-group">
+                    <input class="form-control" id="searchInput" type="text" placeholder="Search">
+                </div>
+            </form>
+        </div>
+
+        <!-- If there is any error message to display -->
+        {% if message %}
+        <div class="jumbotron">
+            <h1 class="display-3"></h1>
+        </div>
+        {% endif %}
+
+        <!-- List of all queried products -->
+        <table class="table table-striped" id="productList">
+            <thead>
+                <th scope="col">Brand</th>
+                <th scope="col">Product Name</th>
+                <th scope="col">Price</th>
+                <th scope="col">Rating</th>
+            </thead>
+            <tbody>
+            {% for product in products %}
+                <tr>
+                    <th scope="row">
+                        <a href={{ url_for('brand', brand_id=product.brand_id) }}>{{ product.brand_name }}</a>
+                    </th>
+                    <td id="prod_name">
+                        <a href={{ url_for('product', product_id=product.product_id) }}>{{ product.product_name }}</a>
+                    </td>
+                    <td>${{ product.price }}</td>
+                    <td>{{ product.rating }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+{% endblock %}

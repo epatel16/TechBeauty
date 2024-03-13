@@ -1,0 +1,32 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Calphora
+{% endblock %}
+
+{% block script %}
+
+{% endblock %}
+
+{% block head %}
+
+{% endblock %}
+
+{% block body %}
+
+    <!-- Main Storefront Image -->
+    <div class="jumbotron" id="imageJumbo">
+        <img src="../static/images/dior.jpg">
+        <div class="centered">
+            <button type="button" class="btn btn-dark">SHOP NOW</button>
+        </div>
+    </div>
+
+    <!-- If there is any error message to display -->
+    {% if message %}
+    <div class="jumbotron">
+        <h1 class="display-3"></h1>
+    </div>
+    {% endif %}
+
+{% endblock %}

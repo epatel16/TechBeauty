@@ -1,0 +1,5 @@
+# ignore all flask_session files
+flask_session/*
+
+# ignore all pycache
+__pycache__/*

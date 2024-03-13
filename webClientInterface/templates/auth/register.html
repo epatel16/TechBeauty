@@ -1,0 +1,42 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Calphora
+{% endblock %}
+
+{% block script %}
+    {% if login %}
+    {% endif %}
+
+{% endblock %}
+
+{% block head %}
+
+{% endblock %}
+
+{% block body %}
+    <div class="jumbotron">
+        <h1 class="display-3"></h1>
+        <h4>{{ message }}</h4>
+    </div>
+
+    {% if login %}
+    <h2> Thank you for visiting us! </h2>
+    {% else %}
+        <h2>Register now!</h2>
+        <form action = "{{ url_for('register')}}" method = "post">
+            <div class = "form-group">
+                <label for="usr">Username:</label>
+                <input class="form-control" name="username" placeholder="Username" id = "usr">
+            </div>
+            <div class = "form-group">
+                <label for="pwd">Password:</label>
+                <input class="form-control" type = "password" name="password" placeholder="Password" id = "pwd">
+            </div>
+            <div class = "form-group">
+                <button class = "btn btn-primary">Register</button>
+            </div>
+        </form>
+
+    {% endif %}
+{% endblock %}

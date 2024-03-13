@@ -1,0 +1,56 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Calphora
+{% endblock %}
+
+{% block script %}
+<script>
+    $(document).ready(function(){
+        $(".alphabet").click(function() {
+            var newId = "div#" + $(this).attr("id");
+            $([document.documentElement, document.body]).animate({
+                scrollTop: $(newId).offset().top
+            }, 2000);
+        });
+    });
+</script>
+
+{% endblock %}
+
+{% block head %}
+
+{% endblock %}
+
+{% block body %}
+    <div class="container" id="brandContainer">
+        <!-- List of all brands -->
+        <table class="table table-striped">
+            <thead>
+                {% for k in brands.keys() %}
+                    <th scope="col" style="text-align: center;"> 
+                        <a href="" class="alphabet" id="{{ k }}" style="color:#000000;text-decoration: none;" 
+                            onMouseOver="this.style.color='#4381e6'" 
+                            onMouseOut="this.style.color='#000000'">
+                        {{k}} 
+                        </a>
+                    </th>
+                {% endfor %}
+            </thead>
+            <tbody>
+        </table>
+        
+        {% for alph, brand in brands.items() %}
+            <div class="container" id="{{ k }}">
+                <h4><b>{{alph}}</b></h4>
+                <ul>
+                    {% for name in brand %}
+                    <li>{{name}}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        {% endfor %}
+    </div>
+    
+
+{% endblock %}
