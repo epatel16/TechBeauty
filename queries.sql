@@ -62,3 +62,7 @@ VALUES (
 -- Insert data into the store table for the new product and brand
 INSERT INTO store (brand_id, product_id, inventory)
 VALUES (1, 1, 50); -- Replace with the actual brand_id, product_id, and inventory quantity
+
+-- Insert item into cart when user adds 1
+INSERT INTO cart (username, product_id, num_items)
+VALUES ('ejpatel', 100, 1);

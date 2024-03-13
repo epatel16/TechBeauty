@@ -86,3 +86,34 @@ CREATE TABLE cart (
     FOREIGN KEY (product_id) REFERENCES product(product_id)
         ON UPDATE CASCADE ON DELETE CASCADE
 );
+
+-- Create purchase history table which stores users' previous purchase
+-- (e.g. products users purchased, the id of the purchase
+-- and the number of each product they purchased)
+CREATE TABLE purchase_history (
+    username     VARCHAR(20),
+    purchase_id  INTEGER AUTO_INCREMENT,
+    product_id   INTEGER,
+    num_items    SMALLINT,
+    PRIMARY KEY (username, purchase_id, product_id),
+    FOREIGN KEY (username) REFERENCES user_info(username)
+        ON UPDATE CASCADE ON DELETE CASCADE,
+    FOREIGN KEY (product_id) REFERENCES product(product_id)
+        ON UPDATE CASCADE ON DELETE CASCADE
+);
+
+-- Create Sale table tha
+CREATE TABLE sale (
+    sale_id         INTEGER PRIMARY KEY AUTO_INCREMENT,
+    product_id      INTEGER,
+    brand_id        INTEGER,
+    product_type    VARCHAR(50),
+    discount        DECIMAL(5, 2) CHECK (discount >= 0 AND discount <= 100),
+    PRIMARY KEY (sale_id),
+    FOREIGN KEY (product_id) REFERENCES product(product_id)
+        ON UPDATE CASCADE ON DELETE CASCADE,
+    FOREIGN KEY (brand_id) REFERENCES brand(brand_id)
+        ON UPDATE CASCADE ON DELETE CASCADE
+);
+
+
