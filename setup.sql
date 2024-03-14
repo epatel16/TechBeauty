@@ -1,6 +1,8 @@
 DROP TABLE IF EXISTS has_ingredient;
 DROP TABLE IF EXISTS store;
 DROP TABLE IF EXISTS cart;
+DROP TABLE IF EXISTS purchase_history;
+DROP TABLE IF EXISTS sale;
 DROP TABLE IF EXISTS brand;
 DROP TABLE IF EXISTS product;
 DROP TABLE IF EXISTS user;
@@ -135,7 +137,7 @@ CREATE TABLE purchase_history (
 -- May either have sale for all products under a given brand id or
 -- for all products of a given type
 CREATE TABLE sale (
-    sale_id         INTEGER PRIMARY KEY AUTO_INCREMENT,
+    sale_id         INTEGER AUTO_INCREMENT,
     brand_id        INTEGER,
     product_type    VARCHAR(50),
     -- what % discount we are giving to the users

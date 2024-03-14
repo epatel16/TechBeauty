@@ -12,9 +12,9 @@ BEGIN
     RETURN totalInventoryPrice;
 END;
 
-
 -- PROCEDURE
 -- Procedure to update inventory for a specific product in the Store table
+-- This is an admin privelage
 CREATE PROCEDURE update_inventory (
     IN product_id CHAR(5),
     IN new_inventory INTEGER
@@ -25,24 +25,50 @@ BEGIN
     WHERE product_id = product_id;
 END;
 
+-- Procedure to remove items from cart for a specific user and add the
+-- info to purchase_history table
+CREATE PROCEDURE move_cart_to_purchase_history(
+    IN p_username VARCHAR(20)
+)
+BEGIN
+    -- Insert items from cart to purchase_history
+    INSERT INTO purchase_history (username, purchase_time, product_id, num_items)
+    SELECT username, NOW() AS purchase_time, product_id, num_items
+    FROM cart WHERE username = p_username;
+        
+    -- Delete items from cart
+    DELETE FROM cart WHERE username = p_username;
+END 
+
+
+-- Procedure to add item to cart and check that there is enough inventory left
+CREATE PROCEDURE add_item_cart(
+    IN p_username VARCHAR(20),
+    IN p_product_id INT
+)
+BEGIN
+    -- Check if the product exists
+    DECLARE available_quantity INT;
+    
+    -- Check if the requested quantity is available in the store
+    SELECT inventory INTO available_quantity
+    FROM store WHERE product_id = p_product_id;
+    
+    IF available_quantity = 0 THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Product is out of stock';
+    ELSE
+        -- Insert the item into the cart
+        INSERT INTO cart (username, product_id, num_items)
+        VALUES (p_username, p_product_id, 1)
+        ON DUPLICATE KEY UPDATE num_items = num_items + 1;
+    END IF;
+END //
+
+DELIMITER ;
 
 
 -- TRIGGER
--- Change delimiter for the trigger creation
-DELIMITER !
-
--- Trigger to update inventory count in the store table after inserting a record into the cart table
-CREATE TRIGGER after_insert_cart AFTER INSERT ON cart FOR EACH ROW
-BEGIN
-    -- Update inventory count in the store table when a product is added to the cart
-    UPDATE store
-    SET inventory = inventory - NEW.num_items
-    WHERE product_id = NEW.product_id;
-END;
-
--- Reset delimiter to semicolon
-DELIMITER ;
-
 
 -- trigger to update inventory on cart checkout
 DELIMITER //
@@ -65,3 +91,7 @@ BEGIN
 END //
 
 DELIMITER ;
+
+
+
+-- checkout trigger needs to be called before move procedure
