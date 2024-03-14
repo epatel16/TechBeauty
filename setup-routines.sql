@@ -26,6 +26,7 @@ BEGIN
 END;
 
 
+
 -- TRIGGER
 -- Change delimiter for the trigger creation
 DELIMITER !
@@ -40,4 +41,27 @@ BEGIN
 END;
 
 -- Reset delimiter to semicolon
+DELIMITER ;
+
+
+-- trigger to update inventory on cart checkout
+DELIMITER //
+
+CREATE TRIGGER after_insert_cart_checkout AFTER INSERT ON cart FOR EACH ROW
+BEGIN
+    DECLARE product_id_var INTEGER;
+    DECLARE num_items_var SMALLINT;
+
+    -- Fetch cart items for the inserted user
+    SELECT product_id, num_items
+    INTO product_id_var, num_items_var
+    FROM cart NATURAL JOIN user_info
+    WHERE username = NEW.username;
+
+    -- Update inventory for the product
+    UPDATE store
+    SET inventory = inventory - num_items_var
+    WHERE product_id = product_id_var;
+END //
+
 DELIMITER ;
