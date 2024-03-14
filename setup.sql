@@ -1,5 +1,7 @@
 DROP TABLE IF EXISTS store;
 DROP TABLE IF EXISTS cart;
+DROP TABLE IF EXISTS purchase_history;
+DROP TABLE IF EXISTS sale;
 DROP TABLE IF EXISTS brand;
 DROP TABLE IF EXISTS product;
 DROP TABLE IF EXISTS user;
@@ -104,7 +106,7 @@ CREATE TABLE purchase_history (
 
 -- Create Sale table tha
 CREATE TABLE sale (
-    sale_id         INTEGER PRIMARY KEY AUTO_INCREMENT,
+    sale_id         INTEGER AUTO_INCREMENT,
     brand_id        INTEGER,
     product_type    VARCHAR(50),
     discount        DECIMAL(5, 2) CHECK (discount >= 0 AND discount <= 100),
