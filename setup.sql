@@ -1,9 +1,11 @@
+DROP TABLE IF EXISTS has_ingredient;
 DROP TABLE IF EXISTS store;
 DROP TABLE IF EXISTS cart;
 DROP TABLE IF EXISTS brand;
 DROP TABLE IF EXISTS product;
 DROP TABLE IF EXISTS user;
 DROP TABLE IF EXISTS user_info;
+DROP TABLE IF EXISTS ingredient;
 
 -- Create Brand table, which contains information about
 -- information about each brand on the store
@@ -13,12 +15,18 @@ CREATE TABLE brand (
     PRIMARY KEY (brand_id)
 );
 
+-- Create ingredients assigns unique id to each ingredient
+CREATE TABLE ingredient (
+    ingredient      INTEGER,
+    ingredient_name VARCHAR(20),
+    PRIMARY KEY (product_id)
+);
+
 -- Create Product table, which contains information about
 CREATE TABLE product (
     product_id      INTEGER,
     product_name    VARCHAR(200) NOT NULL,
     product_type    VARCHAR(50),
-    ingredients     TEXT,
     price           DECIMAL(10,2) CHECK (price >= 0),
     rating          DECIMAL(3,2) CHECK (rating >= 0 AND rating <= 5),
     is_combination  TINYINT DEFAULT 0 
@@ -33,6 +41,19 @@ CREATE TABLE product (
                     CHECK (is_sensitive = 0 OR is_sensitive = 1),
     PRIMARY KEY (product_id)
 );
+
+-- Creates a table has_ingredient which is a relation set that represents
+-- which ingredient is used in which table
+CREATE TABLE has_ingredient (
+    product_id      INTEGER,
+    ingredient_id   INTEGER,
+    PRIMARY KEY (product_id, ingredient_id),
+    FOREIGN KEY (product_id) REFERENCES product(product_id)
+        ON DELETE CASCADE,
+    FOREIGN KEY (ingredient_id) REFERENCES ingredient(ingredient_id)
+        ON DELETE CASCADE
+);
+
 
 -- Create store table that keeps an inventory of each product 
 -- from each brand
@@ -76,9 +97,14 @@ CREATE TABLE user_info (
 -- Create Cart table which stores users' shopping cart
 -- (e.g. products users intend to purchase, and the number
 -- of each product that they plan to purchase)
+-- there will be multiple carts under each user, depending on
+-- how many products user tries to purchase
 CREATE TABLE cart (
     username     VARCHAR(20),
+    -- the id of the product that the user is trying to purchase
     product_id   INTEGER,
+    -- the number of the given product (with that product_id) the 
+    -- user wishes to purchase
     num_items    SMALLINT,
     PRIMARY KEY (username, product_id),
     FOREIGN KEY (username) REFERENCES user_info(username)
@@ -92,25 +118,31 @@ CREATE TABLE cart (
 -- and the number of each product they purchased)
 CREATE TABLE purchase_history (
     username        VARCHAR(20),
+    -- the time at which user checked out the product
     purchase_time   TIMESTAMP,
+    -- id of the product purchased
     product_id      INTEGER,
+    -- number of product (of that product_id) purchased
     num_items       SMALLINT,
     PRIMARY KEY (username, product_id),
     FOREIGN KEY (username) REFERENCES user_info(username)
         ON UPDATE CASCADE ON DELETE CASCADE,
     FOREIGN KEY (product_id) REFERENCES product(product_id)
-        ON UPDATE CASCADE ON DELETE CASCADE
+        ON DELETE CASCADE
 );
 
--- Create Sale table tha
+-- Create Sale table that represents all the ongoing sales for the clients
+-- May either have sale for all products under a given brand id or
+-- for all products of a given type
 CREATE TABLE sale (
     sale_id         INTEGER PRIMARY KEY AUTO_INCREMENT,
     brand_id        INTEGER,
     product_type    VARCHAR(50),
+    -- what % discount we are giving to the users
     discount        DECIMAL(5, 2) CHECK (discount >= 0 AND discount <= 100),
     PRIMARY KEY (sale_id),
     FOREIGN KEY (brand_id) REFERENCES brand(brand_id)
-        ON UPDATE CASCADE ON DELETE CASCADE
+        ON DELETE CASCADE
 );
 
 
