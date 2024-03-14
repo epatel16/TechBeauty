@@ -7,6 +7,16 @@
     background-color: #fce3d9;
 }
 
+#navIcons{
+    text-decoration: none;
+    color: black;
+}
+
+#navIcons:hover{
+    text-decoration: underline;
+    color: black;
+}
+
 /* Main Image */
 #imageJumbo{
     padding: 0px;
@@ -34,6 +44,7 @@
         margin-bottom:20px;
     };
     img{
+        max-width: 100%;
         width: 100%;
     };
     a{
@@ -48,6 +59,35 @@
     };
     button{
         background-color: #faaf9c;
+        border: 0px;
+    }
+}
+
+/* register.html */
+#signupBox{
+    font-family: 'Lato',Arial, sans-serif;
+    margin-top: 10%;
+    margin-bottom:10%;
+    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+    .form-group{
+        margin-bottom:20px;
+    };
+    img{
+        width: 100%;
+        max-width:100%;
+    };
+    a{
+        text-decoration: none;
+        color: #be9597;
+    };
+    a:hover{
+        text-decoration: underline;
+    };
+    #forgot{
+        float: right;
+    };
+    button{
+        background-color: #be9597;
         border: 0px;
     }
 }
@@ -71,4 +111,31 @@
         text-decoration: none;
         color: black;
     }
+}
+
+/* product.html */
+/* brand.html */
+#wrapper{
+    max-width: 70%;
+    width: 70%;
+    margin-top: 5%;
+    margin-bottom: 5%;
+    img {
+        width: 100%;
+    }
+}
+
+#prodContainer {
+    float: left;
+    h5{
+        margin-top: 2%;
+    }
+}
+
+#addToCart{
+    float: right;
+}
+
+#productWrapper{
+    margin-top: 2%;
 }

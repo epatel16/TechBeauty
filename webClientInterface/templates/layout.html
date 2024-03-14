@@ -1,18 +1,17 @@
 <!DOCTYPE html>
 <html>
     <head>
-        <title>{% block title %}{% endblock %}</title>
+        <title>Calphora</title>
         <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
         <script src="https://kit.fontawesome.com/b4f03f6df5.js" crossorigin="anonymous"></script>
-        <!--<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">-->
         <link rel="stylesheet" href="../static/style.css">
-        <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+        <script   src="https://code.jquery.com/jquery-3.4.1.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
         <script src="https://cdn.jsdelivr.net/npm/popper.js@1.14.7/dist/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
-        <link rel="shortcut icon" type="image/x-icon" href="../static/images/favicon.ico" />
         {% block script %}{% endblock %}
     </head>
     <header>
+      <link rel="shortcut icon" type="image/x-icon" href="../static/images/favicon.ico" />
         {% block head %}
         {% endblock %}
     </header>
@@ -21,20 +20,20 @@
     <nav class="navbar navbar-expand-lg navbar-light py-3">
         <div class="container">
             <!-- Brand logo -->
-            <a class="navbar-brand mb-0 h1" href={{ url_for('home') }}>Calphora</a>
+            <a class="navbar-brand mb-0 h1" href={{ url_for('index') }}>Calphora</a>
             <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
             </button>
         
             <div class="d-flex align-items-center">
+                <a href={{ url_for('cart') }} id="navIcons" style="margin-right:20px"> Cart</a>
                 {% if login %}
-                <a href="#"><i class="fa-regular fa-user"></i></a>
+                <a href={{ url_for('mypage') }} id="navIcons">My Page</a>
                 {% else %}
                 <a href={{ url_for('login') }} type="button" class="btn btn-dark me-3">
                   Sign In
                 </a>
                 {% endif %}
-                <a href="#"><i class="fa-solid fa-cart-shopping"></i></a>
             </div>
         </div>
     </nav>
@@ -51,7 +50,7 @@
               <a class="nav-link" href={{ url_for('brands') }}>All Brands</a>
             </li>
             <li class="nav-item">
-                <a class="nav-link" href={{ url_for('products' )}}>All Products</a>
+                <a class="nav-link" href={{ url_for('products')}}>All Products</a>
             </li>
             <li class="nav-item dropdown">
               <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">

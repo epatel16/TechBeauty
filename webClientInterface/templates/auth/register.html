@@ -1,42 +1,43 @@
 {% extends "layout.html" %}
 
-{% block title %}
-    Calphora
-{% endblock %}
-
 {% block script %}
-    {% if login %}
-    {% endif %}
-
 {% endblock %}
 
 {% block head %}
-
 {% endblock %}
 
 {% block body %}
-    <div class="jumbotron">
-        <h1 class="display-3"></h1>
-        <h4>{{ message }}</h4>
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-7 col-lg-5">
+            <div class="wrap" id="signupBox">
+                <img src="../static/images/signupImage.png">
+                <div class="login-wrap p-4 p-md-5">
+                <div class="d-flex">
+                    <div class="w-100">
+                        <h3 class="mb-4">Sign Up</h3>
+                    </div>
+                </div>
+                <div>
+                    <p style="color:red;">{{ message }}</p>
+                </div>
+                <form action="{{ url_for('register') }}" class="signin-form" method="post">
+                    <div class="form-group mt-3">
+                        <input type="text" class="form-control" name="username" placeholder="username" required>
+                    </div>
+                    <div class="form-group">
+                        <input name="password" type="password" class="form-control" placeholder="password" required>
+                    </div>
+                    <div class="form-group">
+                        <button type="submit" class="form-control btn btn-primary rounded submit px-3">
+                            <b>Sign Up</b>
+                        </button>
+                    </div>
+                </form>
+            <p class="text-center">Already a member? <a href={{ url_for('login') }}>Sign In</a></p>
+        </div>
+      </div>
+     </div>
     </div>
-
-    {% if login %}
-    <h2> Thank you for visiting us! </h2>
-    {% else %}
-        <h2>Register now!</h2>
-        <form action = "{{ url_for('register')}}" method = "post">
-            <div class = "form-group">
-                <label for="usr">Username:</label>
-                <input class="form-control" name="username" placeholder="Username" id = "usr">
-            </div>
-            <div class = "form-group">
-                <label for="pwd">Password:</label>
-                <input class="form-control" type = "password" name="password" placeholder="Password" id = "pwd">
-            </div>
-            <div class = "form-group">
-                <button class = "btn btn-primary">Register</button>
-            </div>
-        </form>
-
-    {% endif %}
+</div>
 {% endblock %}

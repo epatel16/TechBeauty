@@ -1,20 +1,6 @@
 {% extends "layout.html" %}
 
-{% block title %}
-    Calphora
-{% endblock %}
-
 {% block script %}
-<script>
-    $(document).ready(function(){
-        $(".alphabet").click(function() {
-            var newId = "div#" + $(this).attr("id");
-            $([document.documentElement, document.body]).animate({
-                scrollTop: $(newId).offset().top
-            }, 2000);
-        });
-    });
-</script>
 
 {% endblock %}
 
@@ -23,34 +9,47 @@
 {% endblock %}
 
 {% block body %}
-    <div class="container" id="brandContainer">
-        <!-- List of all brands -->
-        <table class="table table-striped">
-            <thead>
-                {% for k in brands.keys() %}
-                    <th scope="col" style="text-align: center;"> 
-                        <a href="" class="alphabet" id="{{ k }}" style="color:#000000;text-decoration: none;" 
-                            onMouseOver="this.style.color='#4381e6'" 
-                            onMouseOut="this.style.color='#000000'">
+<div class="container" id="brandContainer">
+    <!-- List of all brands -->
+    <table class="table table-striped">
+        <!-- Go through all alphabets -->
+        <thead>
+            {% for k in brands.keys() %}
+                <th scope="col" style="text-align: center;"> 
+                    <!-- When there is no brand starting with the alphabet -->
+                    {% if brands[k] == [] %}
+                    <a href="" class="alphabet" id="{{ k }}" 
+                        style="color:#5A5A5A;text-decoration: none;pointer-events:none;" 
+                        onMouseOver="this.style.color='#4381e6'" 
+                        onMouseOut="this.style.color='#000000'">
                         {{k}} 
-                        </a>
-                    </th>
+                    </a>
+                    <!-- Otherwise -->
+                    {% else %}
+                    <a href="#brand_{{k}}" class="alphabet" id="{{ k }}" 
+                        style="color:#000000;" 
+                        onMouseOver="this.style.color='#4381e6'" 
+                        onMouseOut="this.style.color='#000000'">
+                        {{k}} 
+                    </a>
+                    {% endif %}
+                </th>
+            {% endfor %}
+        </thead>
+        <tbody>
+    </table>
+    <!-- For all (alphabet, [brand_names list]) pairs in brands dictionary -->
+    {% for alph, brand in brands.items() %}
+        <div class="container">
+            <h4 id="brand_{{ alph }}"><b>{{alph}}</b></h4>
+            <ul>
+                {% for name in brand %}
+                <li><a href="{{ url_for('brand', brand_name=name) }}">{{name}}</a></li>
                 {% endfor %}
-            </thead>
-            <tbody>
-        </table>
-        
-        {% for alph, brand in brands.items() %}
-            <div class="container" id="{{ k }}">
-                <h4><b>{{alph}}</b></h4>
-                <ul>
-                    {% for name in brand %}
-                    <li>{{name}}</li>
-                    {% endfor %}
-                </ul>
-            </div>
-        {% endfor %}
-    </div>
-    
+            </ul>
+        </div>
+    {% endfor %}
+</div>
+
 
 {% endblock %}
