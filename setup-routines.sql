@@ -18,14 +18,14 @@ DELIMITER ;
 -- Function to calculate the total value of the cart
 DROP FUNCTION IF EXISTS calculate_cart_total;
 DELIMITER !
-CREATE FUNCTION calculate_cart_total(username VARCHAR(20))
+CREATE FUNCTION calculate_cart_total(p_username VARCHAR(20))
 RETURNS DECIMAL DETERMINISTIC
 BEGIN
     DECLARE totalCartPrice DECIMAL(10,2);
 
     SELECT SUM(price * num_items) INTO totalCartPrice
-    FROM cart NATURAL JOIN product NATURAL JOIN store
-    WHERE username=username;
+    FROM cart NATURAL JOIN product
+    WHERE username=p_username;
 
     RETURN totalCartPrice;
 END !
@@ -37,7 +37,7 @@ DELIMITER ;
 DROP PROCEDURE IF EXISTS update_inventory;
 DELIMITER !
 CREATE PROCEDURE update_inventory (
-    IN product_id CHAR(5),
+    IN product_id INTEGER,
     IN new_inventory INTEGER
 )
 BEGIN
@@ -57,8 +57,8 @@ CREATE PROCEDURE move_cart_to_purchase_history(
 BEGIN
     -- Insert items from cart to purchase_history
     INSERT INTO purchase_history (username, purchase_time, product_id, num_items)
-    SELECT username, NOW() AS purchase_time, product_id, num_items
-    FROM cart WHERE username = p_username;
+        SELECT username, NOW() AS purchase_time, product_id, num_items
+        FROM cart WHERE username = p_username;
         
     -- Delete items from cart
     DELETE FROM cart WHERE username = p_username;
@@ -70,7 +70,7 @@ DROP PROCEDURE IF EXISTS add_item_cart;
 DELIMITER !
 CREATE PROCEDURE add_item_cart(
     IN p_username VARCHAR(20),
-    IN p_product_id INT
+    IN p_product_id INTEGER
 )
 BEGIN
     -- Check if the product exists
@@ -92,28 +92,54 @@ BEGIN
 END !
 DELIMITER ;
 
-
--- TRIGGER
-
--- trigger to update inventory on user checks out items in their cart
-DROP TRIGGER IF EXISTS after_cart_checkout;
+-- Procedure to decrease the number of an item in cart
+DROP PROCEDURE IF EXISTS decrease_item_cart;
 DELIMITER !
-CREATE TRIGGER after_cart_checkout AFTER INSERT ON cart FOR EACH ROW
+CREATE PROCEDURE decrease_item_cart(
+    IN p_username VARCHAR(20),
+    IN p_product_id INTEGER
+)
 BEGIN
-    DECLARE product_id_var INTEGER;
-    DECLARE num_items_var SMALLINT;
-
-    -- Fetch cart items for the inserted user
-    SELECT product_id, num_items
-    INTO product_id_var, num_items_var
-    FROM cart NATURAL JOIN user_info
-    WHERE username = NEW.username;
-
-    -- Update inventory for the product
-    UPDATE store
-    SET inventory = inventory - num_items_var
-    WHERE product_id = product_id_var;
+    UPDATE cart
+    SET num_items = num_items - 1
+    WHERE product_id = p_product_id AND
+    username = p_username;
 END !
 DELIMITER ;
 
--- checkout trigger needs to be called before move procedure
+-- Procedure to delete an item from the cart
+DROP PROCEDURE IF EXISTS delete_item_cart;
+DELIMITER !
+CREATE PROCEDURE delete_item_cart(
+    IN p_username VARCHAR(20),
+    IN p_product_id INTEGER
+)
+BEGIN
+    DELETE FROM cart
+    WHERE product_id = p_product_id AND
+    username = p_username;
+END !
+DELIMITER ;
+
+-- TRIGGER
+DROP TRIGGER IF EXISTS after_cart_checkout;
+DELIMITER !
+-- after_cart_checkout trigger which gets triggered BEFORE 
+-- every time a new row is inserted into purchase_history
+CREATE TRIGGER after_cart_checkout BEFORE INSERT ON purchase_history FOR EACH ROW
+BEGIN
+    DECLARE num_items_var INTEGER;
+    DECLARE curr_inventory INTEGER;
+
+    -- Fetch cart items for the inserted user
+    SELECT num_items, inventory
+    INTO num_items_var, curr_inventory
+    FROM cart NATURAL JOIN store
+    WHERE username = NEW.username
+    AND product_id = NEW.product_id;
+
+    UPDATE store
+    SET inventory = inventory - num_items_var
+    WHERE product_id = NEW.product_id;
+END !
+DELIMITER ;

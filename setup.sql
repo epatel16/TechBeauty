@@ -20,7 +20,7 @@ CREATE TABLE brand (
 -- Create ingredients assigns unique id to each ingredient
 CREATE TABLE ingredient (
     ingredient_id   INTEGER,
-    ingredient_name VARCHAR(100),
+    ingredient_name VARCHAR(100) NOT NULL,
     PRIMARY KEY (ingredient_id)
 );
 
@@ -28,10 +28,11 @@ CREATE TABLE ingredient (
 CREATE TABLE product (
     product_id      INTEGER,
     product_name    VARCHAR(200) NOT NULL,
-    product_type    VARCHAR(50),
-    price           DECIMAL(10,2) CHECK (price >= 0),
-    rating          DECIMAL(3,2) CHECK (rating >= 0 AND rating <= 5),
-    is_combination  TINYINT DEFAULT 0 
+    product_type    VARCHAR(50) NOT NULL,
+    price           DECIMAL(10,2) NOT NULL CHECK (price >= 0),
+    rating          DECIMAL(3,2) NOT NULL 
+                    CHECK (rating >= 0 AND rating <= 5),
+    is_combination  TINYINT DEFAULT 0
                     CHECK (is_combination = 0 OR is_combination = 1),
     is_dry          TINYINT DEFAULT 0
                     CHECK (is_dry = 0 OR is_dry = 1),
@@ -62,23 +63,15 @@ CREATE TABLE has_ingredient (
 CREATE TABLE store (
     brand_id    INTEGER,
     product_id  INTEGER,
-    -- Inventory is randomly generated as an integer between 10 and 120
-    inventory INTEGER,
+    -- initial inventory is randomly generated as an integer between 10 and 120
+    -- though the number is not bound to the range
+    inventory INTEGER NOT NULL,
     PRIMARY KEY (brand_id, product_id),
     FOREIGN KEY (brand_id) REFERENCES brand(brand_id)
         ON UPDATE CASCADE ON DELETE CASCADE,
     FOREIGN KEY (product_id) REFERENCES product(product_id)
         ON UPDATE CASCADE ON DELETE CASCADE
 );
-
--- Create User table which stores the username and
--- password for each user, which users will use for authentication.
--- CREATE TABLE user (
---     user_id     INTEGER AUTO_INCREMENT,
---     username    VARCHAR(15) NOT NULL,
---     pwd    VARCHAR(20) NOT NULL,
---     PRIMARY KEY (user_id)
--- );
 
 CREATE TABLE user_info (
     -- Usernames are up to 20 characters.
@@ -107,8 +100,10 @@ CREATE TABLE cart (
     product_id   INTEGER,
     -- the number of the given product (with that product_id) the 
     -- user wishes to purchase
-    num_items    SMALLINT,
+    num_items    SMALLINT NOT NULL,
     PRIMARY KEY (username, product_id),
+    -- when the user account gets deleted or the product gets taken
+    -- down from the website, corresonding cart entries must be removed
     FOREIGN KEY (username) REFERENCES user_info(username)
         ON DELETE CASCADE,
     FOREIGN KEY (product_id) REFERENCES product(product_id)
@@ -119,18 +114,22 @@ CREATE TABLE cart (
 -- (e.g. products users purchased, the id of the purchase
 -- and the number of each product they purchased)
 CREATE TABLE purchase_history (
-    username        VARCHAR(20),
+    -- id assigned to past purchases
+    purchase_id     INTEGER AUTO_INCREMENT, 
+    username        VARCHAR(20) NOT NULL,
     -- the time at which user checked out the product
-    purchase_time   TIMESTAMP,
+    purchase_time   TIMESTAMP NOT NULL,
     -- id of the product purchased
-    product_id      INTEGER,
+    product_id      INTEGER NOT NULL,
     -- number of product (of that product_id) purchased
-    num_items       SMALLINT,
-    PRIMARY KEY (username, product_id),
-    FOREIGN KEY (username) REFERENCES user_info(username)
-        ON UPDATE CASCADE ON DELETE CASCADE,
+    num_items       SMALLINT NOT NULL,
+    PRIMARY KEY (purchase_id),
+    -- we will still keep the purchase history when the
+    -- user account is deleted or the product is taken down
+    -- from the website so we can still accurately compute
+    -- statistics
+    FOREIGN KEY (username) REFERENCES user_info(username),
     FOREIGN KEY (product_id) REFERENCES product(product_id)
-        ON DELETE CASCADE
 );
 
 CREATE INDEX index_ptype ON product (product_type);

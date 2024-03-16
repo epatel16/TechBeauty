@@ -1,6 +1,8 @@
 from flask import Flask, session, render_template, request, redirect, url_for
 from flask_session import Session
 import sys
+from collections import defaultdict
+from datetime import date
 
 # SQLAlchemy for Interactions with MySQL
 from sqlalchemy import create_engine
@@ -48,29 +50,71 @@ def authenticate(username, password) -> bool:
 # execute a query to check if the username exists in the database
 def check_username(username) -> bool:
     # select users who have a matching username
-    if db.execute(text("SELECT * FROM user_info WHERE username = :username"), 
+    if db.execute(text("SELECT * FROM user_info WHERE username = :username;"), 
                       {"username": username}).rowcount != 0:
         return 1
     else: 
         return 0
 
-###### 2. Helpers for cart
+###### 2. Helpers for cart and purchases
 # execute a procedure to add an item to a cart
 def add_item(product_id):
     ## execute our pre-loaded MySQL procedure `add_item_cart`
     add_cart = "CALL add_item_cart(\'%s\', \'%s\');" % (session.get("username"), product_id)
     try:
         db.execute(text(add_cart))
+        db.commit()
+        return 1
+    except exc.DatabaseError as e:
+        return 0
+
+# execute a procedure to decrease the number of an item to a cart
+def decrease_item(product_id):
+    ## execute our pre-loaded MySQL procedure `decrease_item`
+    remove_item = "CALL decrease_item_cart(\'%s\', \'%s\');" % (session.get("username"), product_id)
+    try:
+        db.execute(text(remove_item))
+        db.commit()
+        return 1
+    except exc.DatabaseError as e:
+        return 0
+    
+# execute a procedure to delete an item to a cart
+def delete_from_cart(product_id):
+    ## execute our pre-loaded MySQL procedure `delete_item_cart`
+    delete = "CALL delete_item_cart(\'%s\', \'%s\');" % (session.get("username"), product_id)
+    try:
+        db.execute(text(delete))
+        db.commit()
         return 1
     except exc.DatabaseError as e:
         return 0
     
 # get all items in the cart for the user
 def get_cart():
-    items = db.execute(text("SELECT * FROM cart NATURAL JOIN product WHERE username=\'%s\'" % 
+    items = db.execute(text("SELECT product_id, price, num_items, brand_name, product_name \
+                            FROM cart NATURAL LEFT JOIN product \
+                            NATURAL JOIN store NATURAL JOIN brand WHERE username=\'%s\'" % 
                             session.get("username"))).fetchall()
     return items
 
+# get the total value of the cart
+def get_cart_total():
+    total = db.execute(text("SELECT calculate_cart_total(\'%s\')" % session.get("username"))).fetchone()
+    if not total[0]:
+        return 0
+    return total[0]
+
+# get all the relevant purchase histories
+def get_purchase_history():
+    purchases = db.execute(text("SELECT * FROM purchase_history NATURAL JOIN product WHERE \
+                             username=\'%s\'" % session.get("username"))).fetchall()
+    # we will group purchase history by timestamp
+    # so purchases made together can be shown as a singular purchase
+    history = defaultdict(list)
+    for purchase in purchases:
+        history[purchase.purchase_time].append(purchase)
+    return history
 
 ####### 3. Helpers for querying products and brands
 # execute a MySQL query to get the list of
@@ -96,12 +140,22 @@ def get_ingredients_of_product(product_id):
         res.append(ing[0].capitalize())
     return res
 
+def search_by_ingredient(ingredient, additional_query=""):
+    query = "SELECT product_id, brand_name, product_name, product_type, \
+            price, rating FROM product NATURAL JOIN (SELECT product_id FROM \
+            has_ingredient NATURAL JOIN ingredient WHERE \
+            ingredient_name LIKE \'%%%s%%\') AS p NATURAL JOIN store \
+            NATURAL JOIN brand %s;" % (ingredient, additional_query)
+    products = db.execute(text(query)).fetchall()
+    return products
+
 # execute a query to get a list of products given the query
 # note that this function is ONLY used for the case where we browse
 # a list of products, for which we will always return same set of
 # attributes 
 def browse_products(sql = ''):
-    sql = 'SELECT product_id, brand_name, product_name, product_type, price, rating, inventory FROM product \
+    sql = 'SELECT product_id, brand_name, product_name, product_type, \
+            price, rating, inventory FROM product \
             NATURAL JOIN store NATURAL JOIN brand %s;' % sql
     rows = db.execute(text(sql)).fetchall()
     return rows    
@@ -208,7 +262,8 @@ def forgot_password():
 @app.route("/products", methods=["POST", "GET"])
 def products():
    product = get_all_products()
-   return render_template("main/products.html", products=product, 
+   brands = get_all_brands()
+   return render_template("main/products.html", products=product, brands=brands,
                           login=session.get("logged_in"), username=session.get("username"))
 
 ## SUBROUTES of Products
@@ -219,6 +274,31 @@ def product(product_id):
    ingredients = get_ingredients_of_product(product_id)
    return render_template('main/product.html', product=result, ingredients=ingredients,
                           login=session.get("logged_in"), username=session.get('username'))
+
+@app.route("/product_filter", methods=["POST"])
+def product_filter():
+    brand = request.form.get('brand')
+    product_type = request.form.get('prod_type')
+    ingredient = request.form.get('ingredients')
+    sql_query_list = []
+    if brand != "-1":
+        sql_query_list.append("brand_id=%s" % brand)
+    if product_type != "-1":
+        sql_query_list.append("product_type=\'%s\'" % product_type)
+    sql = "WHERE " + (" AND ".join(sql_query_list))
+    if ingredient:
+        if sql_query_list:
+            result = search_by_ingredient(ingredient, sql)
+        else:
+            result = search_by_ingredient(ingredient)
+    else:
+        if sql_query_list:
+            result = browse_products(sql)
+        else:
+            return redirect(url_for("products"))
+    brands = get_all_brands()
+    return render_template("main/products.html", products=result, brands=brands,
+                        login=session.get("logged_in"), username=session.get("username"))
 
 # Page to show all brands
 @app.route("/brands", methods=["POST", "GET"])
@@ -233,13 +313,13 @@ def brands():
 
 ## SUBROUTES of Brands
 # Page to show a brand and all of its products
-@app.route("/brand/brand_name=<brand_name>", methods=["GET"])
+@app.route("/brands/brand_name=<brand_name>", methods=["GET"])
 def brand(brand_name = None):
     prods = browse_products('WHERE brand_name=\'%s\''% brand_name)
     return render_template("main/brand.html", products=prods, login=session.get("logged_in"), username=session.get("username"))
 
 # Search by Product Type
-@app.route("/product_type/product_type=<product_type>", methods=['GET'])
+@app.route("/products/product_type=<product_type>", methods=['GET'])
 def product_type(product_type):
     prods = browse_products('WHERE product_type=\'%s\'' % product_type)
     return render_template("main/products.html", products=prods, login=session.get("logged_in"), username=session.get("username"))
@@ -247,6 +327,8 @@ def product_type(product_type):
 # add to shopping cart
 @app.route("/add_to_cart/product_id=<product_id>", methods=["POST"])
 def add_to_cart(product_id):
+    if not session.get("logged_in"):
+        return redirect(url_for('login'))
     if request.method == "POST":
         if add_item(product_id):
             return redirect(url_for('cart'))
@@ -260,26 +342,58 @@ def add_to_cart(product_id):
         return redirect(url_for('cart'))
 
 # check shopping cart
-@app.route("/cart", methods=['GET', 'POST'])
+@app.route("/cart", methods=['GET'])
 def cart():
-    if request.method == "POST":
-        return None
+    if session.get("logged_in"):
+        items = get_cart()
+        total_cart = get_cart_total()
+        return render_template('cart/cart.html', cart_items=items, total_value=total_cart,
+                               login=session.get("logged_in"), username=session.get('username'))
     else:
-        if session.get("logged_in"):
-            items = get_cart()
-            return render_template('cart/cart.html', cart_items=items, 
-                                    login=session.get("logged_in"), 
-                                    username=session.get('username'))
-        else:
-            return redirect(url_for('login'))
+        return redirect(url_for('login'))
 
+# update the number of an item in one's cart
+@app.route("/update_cart/product_id=<product_id>&is_increase=<is_increase>", methods=["POST"])
+def update_cart(product_id, is_increase=False):
+    if is_increase == "1":
+        add_item(product_id)
+    else:
+        decrease_item(product_id)
+    return redirect(url_for('cart'))
+
+# deletes an item from the user's cart
+@app.route("/delete_item/product_id=<product_id>", methods=["POST"])
+def delete_item(product_id):
+    delete_from_cart(product_id)
+    return redirect(url_for('cart'))
 
 # check out items in your cart
-@app.route("/check_out")
-def check_out():
-    return None
+@app.route("/checkout", methods=["POST"])
+def checkout():
+    if session.get("logged_in"):
+        items = get_cart()
+        total_cart = get_cart_total()
+        sql = "CALL move_cart_to_purchase_history(\'%s\')" % session.get("username")
+        try:
+            db.execute(text(sql))
+            db.commit()
+            return render_template('cart/purchase_complete.html', items=items, order_date=date.today(),
+                           total_price = total_cart, login=session.get("logged_in"), 
+                           username=session.get("username"))
+        except exc.DatabaseError as e:
+            return render_template('cart/cart.html', cart_items=items, total_value=total_cart,
+                               message="We are currently unable to check out your order.",
+                               login=session.get("logged_in"), username=session.get('username'))
+    else:
+        return redirect(url_for('login'))
+    
 
 # my page to see order history, etc.
 @app.route("/mypage")
 def mypage():
-    return None
+    if session.get("logged_in"):
+        history = get_purchase_history()
+        return render_template('auth/mypage.html', history=history,
+                               login=session.get("logged_in"), username=session.get("username"))
+    else:
+        return redirect(url_for("login"))

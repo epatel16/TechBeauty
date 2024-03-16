@@ -7,5 +7,43 @@
 {% endblock %}
 
 {% block body %}
+<div class="container" id="wrapper">
+    <h2>Hello, {{ username }}!</h2>
+    
+    <div class="row row-cols-1 row-cols-md-3" id="purchaseWrapper">
+        {% for time, purchases in history.items() %}
+        <div class="col mb-4">
+          <div class="card h-100 shadow p-3 mb-5 bg-white rounded">
+            <img src="../static/images/Image_not_available.png" class="card-img-top" alt="product image not found">
+            <div class="card-body">
+                <div class="text-center">
+                  <h5 class="card-title">
+                    Purchase on {{ time.strftime('%m/%d/%Y') }}
+                  </h5>
+                </div>
+                <div>
+                    <ul>
+                    {% for purchase in purchases %}
+                    <li>
+                        <div class="d-flex justify-content-between">
+                        <span>
+                            <a href={{ url_for('product', product_id=purchase.product_id) }}>
+                            {{ purchase.product_name }}
+                            </a>
+                        </span>
+                        </div>
+                    </li>
+                    {% endfor %}
+                    </ul>
+                </div>
+                <div class="text-center">
+                    <h6> Total Price: ${{ purchases | sum(attribute='price') }}</h6>
+                </div>
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+</div>
 
 {% endblock %}

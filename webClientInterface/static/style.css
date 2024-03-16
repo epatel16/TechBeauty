@@ -29,7 +29,7 @@
 
 .centered {
     position: absolute;
-    top: 80%;
+    top: 70%;
     left: 63%;
     transform: translate(-50%, -50%);
 }
@@ -138,4 +138,29 @@
 
 #productWrapper{
     margin-top: 2%;
+}
+
+/* cart.html */
+#cartContainer{
+    max-width: 90%;
+    width: 90%;
+    margin-top: 3%;
+    margin-bottom: 3%;
+    img {
+        width: 100%;
+    }
+    #username{
+        margin-left: 2%;
+    }
+}
+
+#cartSummary{
+    background-color: #be9597;
+    border-radius: 0px 15px 15px 0px;
+}
+
+/* mypage.html */
+#purchaseWrapper{
+    margin-top: 3%;
+    margin-bottom: 3%;
 }

@@ -1,7 +1,13 @@
 """
 Student name(s): Eshani Patel, Rachael Kim
 Student email(s): ejpatel@caltech.edu, subinkim@caltech.edu
-High-level program overview
+High-level program overview:
+- `app-admin.py` allows the admin user of our service to manage the store.
+- admin user will be allowed to perform following operations:
+1) add or delete product
+2) update inventory
+3) 
+
 """
 import sys  # to print error messages to sys.stderr
 import os

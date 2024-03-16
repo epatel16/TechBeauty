@@ -10,99 +10,138 @@
 
 {% if login %}
 
-<div class="container">
-    <h1>Hello, {{username}}!</h1>
+<div class="container" id="cartContainer">
+    <h1 id="username">Hello, {{username}}!</h1>
 
-    <section class="h-100 h-custom" style="background-color: #eee;">
+    <section class="h-100 h-custom">
         <div class="container py-5 h-100">
           <div class="row d-flex justify-content-center align-items-center h-100">
-            <div class="col">
-              <div class="card">
-                <div class="card-body p-4">
-      
-                  <div class="row">
-      
-                    <div class="col-lg-7">
-                      <h5 class="mb-3"><a href="#!" class="text-body"><i
-                            class="fas fa-long-arrow-alt-left me-2"></i>Continue shopping</a></h5>
-                      <hr>
-      
-                      <div class="d-flex justify-content-between align-items-center mb-4">
-                        <div>
-                          <p class="mb-1">Shopping cart</p>
-                          <p class="mb-0">You have{{  }} items in your cart</p>
+            <div class="col-12">
+              <div class="card card-registration card-registration-2" style="border-radius: 15px;">
+                <div class="card-body p-0">
+                  <div class="row g-0">
+                    <div class="col-lg-8">
+                      <div class="p-5">
+                        <div class="d-flex justify-content-between align-items-center mb-5">
+                          <h1 class="fw-bold mb-0 text-black">Shopping Cart</h1>
+                          <h6 class="mb-0 text-muted">{{ cart_items|length }} items</h6>
                         </div>
-                        <div>
-                          <p class="mb-0"><span class="text-muted">Sort by:</span> <a href="#!"
-                              class="text-body">price <i class="fas fa-angle-down mt-1"></i></a></p>
-                        </div>
-                      </div>
-                      {% for item in items %}
-                      <div class="card mb-3">
-                        <div class="card-body">
-                          <div class="d-flex justify-content-between">
-                            <div class="d-flex flex-row align-items-center">
-                              <div>
-                                <img
-                                  src="https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-shopping-carts/img1.webp"
-                                  class="img-fluid rounded-3" alt="Shopping item" style="width: 65px;">
-                              </div>
-                              <div class="ms-3">
-                                <h5>{{item.product_name}} </h5>
-                                <p class="small mb-0">{{item.brand_name}}</p>
-                              </div>
-                            </div>
-                            <div class="d-flex flex-row align-items-center">
-                              <div style="width: 50px;">
-                                <h5 class="fw-normal mb-0">{{item.num_items}}</h5>
-                              </div>
-                              <div style="width: 80px;">
-                                <h5 class="mb-0">{{item.price}}</h5>
-                              </div>
-                              <a href="#!" style="color: #cecece;"><i class="fas fa-trash-alt"></i></a>
-                            </div>
+                        <hr class="my-4">
+                        {% if cart_items %}
+                        
+                        {% for item in cart_items %}
+                        <div class="row mb-4 d-flex justify-content-between align-items-center">
+                          <div class="col-md-2 col-lg-2 col-xl-2">
+                            <img
+                              src="../static/images/Image_not_available.png"
+                              class="img-fluid rounded-3" alt="Image Not Found">
+                          </div>
+                          <div class="col-md-3 col-lg-3 col-xl-3">
+                            <h6 class="text-muted">
+                                <a href={{ url_for('brand', brand_name=item.brand_name) }}>
+                                {{ item.brand_name }}
+                                </a>
+                            </h6>
+                            <h6 class="text-black mb-0">
+                                <a href={{ url_for('product', product_id=item.product_id) }}>
+                                    {{ item.product_name }}
+                                </a>
+                            </h6>
+                          </div>
+                          <div class="col-md-3 col-lg-3 col-xl-2 d-flex">
+                            <form action="{{url_for('update_cart', product_id=item.product_id, is_increase=0)}}" method="post">
+                              {% if item.num_items > 1 %}
+                              <button class="btn btn-link px-2">
+                                <i class="fas fa-minus"></i>
+                              </button>
+                              {% else %}
+                              <button class="btn btn-link px-2" disabled>
+                                <i class="fas fa-minus"></i>
+                              </button>
+                              {% endif %}
+                          </form>
+      
+                            <input id="form1" min="0" name="quantity" value="{{item.num_items}}" type="number"
+                              class="form-control form-control-sm" disabled/>
+                            <form action="{{url_for('update_cart', product_id=item.product_id, is_increase=1)}}" method="post">
+                              <button class="btn btn-link px-2">
+                                <i class="fas fa-plus"></i>
+                              </button>
+                            </form>
+                          </div>
+                          <div class="col-md-3 col-lg-2 col-xl-2 offset-lg-1">
+                            <h6 class="mb-0">{{ item.price }}</h6>
+                          </div>
+                          <div class="col-md-1 col-lg-1 col-xl-1 text-end">
+                            <form action="{{ url_for('delete_item', product_id=item.product_id) }}" method="post">
+                              <button class="text-muted btn btn-primary-outline">
+                                  <i class="fas fa-times"></i>
+                              </button>
+                            </form>
                           </div>
                         </div>
-                      </div>
-                      {% endfor %}
-    
       
+                        <hr class="my-4">
+                        {% endfor %}
+                        {% else %}
+                        <h5>Your cart is currently empty!</h5>
+                        {% endif %}
+      
+                        <div class="pt-5">
+                          <h6 class="mb-0"><a href={{ url_for('products') }} class="text-body"><i
+                                class="fas fa-long-arrow-alt-left me-2"></i>Back to shop</a></h6>
+                        </div>
+
+                      </div>
                     </div>
-                    <div class="col-lg-5">
-      
-                      <div class="card bg-primary text-white rounded-3">
-                        <div class="card-body">
-                          <hr class="my-4">
-      
-                          <div class="d-flex justify-content-between">
-                            <p class="mb-2">Subtotal</p>
-                            <p class="mb-2">$4798.00</p>
-                          </div>
-      
-                          <div class="d-flex justify-content-between">
-                            <p class="mb-2">Shipping</p>
-                            <p class="mb-2">$20.00</p>
-                          </div>
-      
-                          <div class="d-flex justify-content-between mb-4">
-                            <p class="mb-2">Total(Incl. taxes)</p>
-                            <p class="mb-2">$4818.00</p>
-                          </div>
-      
-                          <button type="button" class="btn btn-info btn-block btn-lg">
-                            <div class="d-flex justify-content-between">
-                              <span>$4818.00</span>
-                              <span>Checkout <i class="fas fa-long-arrow-alt-right ms-2"></i></span>
-                            </div>
-                          </button>
-      
+
+                    <div class="col-lg-4 bg-grey" id="cartSummary">
+                      <div class="p-5">
+                        <h3 class="fw-bold mb-5 mt-2 pt-1">Summary</h3>
+                        <hr class="my-4">
+                        {% if message %}
+                        <div class="d-flex justify-content-between mb-4">
+                          <p>{{ message }}</p>
                         </div>
+                        {% endif %}
+
+                        <div class="d-flex justify-content-between mb-4">
+                          <h5 class="text-capitalize">Item Total</h5>
+                          <h5>${{ total_value }}</h5>
+                        </div>
+                        
+                        <div class="d-flex justify-content-between mb-4">
+                          <h5 class="text-capitalize">Shipping</h5>
+                          {% if total_value < 100 and total_value != 0 %}
+                          <h5>$10</h5>
+                          {% else %}
+                          <h5>$0</h5>
+                          {% endif %}
+                        </div>
+
+                        <hr class="my-4">
+                        
+                        <div class="d-flex justify-content-between mb-5">
+                          <h5 class="text-capitalize">Total price</h5>
+                          <h5>
+                            {% if total_value < 100 and total_value != 0 %}
+                            ${{ total_value + 10 }}
+                            {% else %}
+                            ${{ total_value }}
+                            {% endif %}
+                          </h5>
+                        </div>
+
+                        <form action="{{ url_for('checkout') }}" method="post">
+                          <div class = "form-group">
+                            <button class="btn btn-dark btn-block btn-lg"
+                            data-mdb-ripple-color="dark">Checkout</button>
+                          </div>
+                        </form>
+      
                       </div>
-      
                     </div>
-      
                   </div>
-      
                 </div>
               </div>
             </div>

@@ -1,7 +1,7 @@
 {% extends "layout.html" %}
 
 {% block title %}
-    Calphora
+    TechBeauty
 {% endblock %}
 
 {% block script %}
@@ -17,7 +17,9 @@
     <div class="jumbotron" id="imageJumbo">
         <img src="../static/images/dior.jpg">
         <div class="centered">
-            <button type="button" class="btn btn-dark">SHOP NOW</button>
+            <form action="{{ url_for('brand', brand_name="DIOR") }}" method="get">
+                <button class="btn btn-dark">SHOP NOW</button>
+            </form>
         </div>
     </div>
 
