@@ -26,11 +26,11 @@ WHERE price < 25 ORDER BY price ASC;
 
 -- Retrieve users and their respective shopping carts
 SELECT username, product_id, product_name, num_items
-FROM user NATURAL JOIN cart NATURAL JOIN product;
+FROM user_info NATURAL JOIN cart NATURAL JOIN product;
 
 -- Find users with a specific product in their cart
 SELECT username, product_id, product_name, num_items
-FROM user NATURAL JOIN cart NATURAL JOIN product
+FROM user_info NATURAL JOIN cart NATURAL JOIN product
 WHERE product_name = 'Water Sleeping Mask';
 
 -- Get the number of products in each product type
@@ -43,20 +43,21 @@ INSERT INTO brand (brand_id, brand_name)
 VALUES (1, 'NewBrand'); -- Replace with the actual brand name
 
 -- Insert data into the product table for a new product
-INSERT INTO product (product_id, product_name, product_type, ingredients, price,
+INSERT INTO product (product_id, product_name, product_type, price,
  rating, is_combination, is_dry, is_normal, is_oily, is_sensitive)
 VALUES (
-    1,                -- Replace with the actual product_id
-    'NewProduct',     -- Replace 'NewProduct' with the actual product name
-    'Type',           -- Replace 'Type' with the actual product type
-    'Ingredient1, Ingredient2',  -- Replace with the actual ingredients
-    19.99,            -- Replace with the actual price
-    4.5,              -- Replace with the actual rating
-    1,                -- Replace with 1 or 0 for is_combination
-    0,                -- Replace with 1 or 0 for is_dry
-    1,                -- Replace with 1 or 0 for is_normal
-    0,                -- Replace with 1 or 0 for is_oily
-    0                 -- Replace with 1 or 0 for is_sensitive
+    1,                
+    'NewProduct',    
+    'Type',           
+    19.99,            
+    4.5,              
+    1,                
+    0,               
+    1,                
+    0,                
+    0              
+-- Replace the above values with actual values you want to insert
+-- Also add to ingredients table accordingly
 );
 
 -- Insert data into the store table for the new product and brand
@@ -66,3 +67,9 @@ VALUES (1, 1, 50); -- Replace with the actual brand_id, product_id, and inventor
 -- Insert item into cart when user adds 1
 INSERT INTO cart (username, product_id, num_items)
 VALUES ('ejpatel', 100, 1);
+
+-- Gets the ingredients of a given product
+SELECT ingredient_id, ingredient_name
+FROM product NATURAL JOIN has_ingredient
+NATURAL JOIN ingredient WHERE product_id = '100';
+-- change product id to specify which product you want to see ingredients for
