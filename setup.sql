@@ -19,9 +19,9 @@ CREATE TABLE brand (
 
 -- Create ingredients assigns unique id to each ingredient
 CREATE TABLE ingredient (
-    ingredient      INTEGER,
-    ingredient_name VARCHAR(20),
-    PRIMARY KEY (product_id)
+    ingredient_id   INTEGER,
+    ingredient_name VARCHAR(100),
+    PRIMARY KEY (ingredient_id)
 );
 
 -- Create Product table, which contains information about
