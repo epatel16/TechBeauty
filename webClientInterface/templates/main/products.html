@@ -56,6 +56,29 @@
                         </div>
                     </div>
                 </div>
+                <div class="row">
+                    <div class="col">
+                        <!--TODO: implement filtering for these-->
+                        <label for="price">Price Range</label>
+                        <select class="form-control" name="price">
+                            <option value=-1>All Price Range</option>
+                            <option value=25>Under $25</option>
+                            <option value=50>$25 - $50</option>
+                            <option value=75>$50 - $75</option>
+                            <option value=76>$75 +</option>
+                        </select>
+                    </div>
+                    <div class="col">
+                        <label for="rating">Rating</label>
+                        <select class="form-control" name="rating">
+                            <option value=-1>All Ratings</option>
+                            <option value=4>4+</option>
+                            <option value=3>3+</option>
+                            <option value=2>2+</option>
+                            <option value=1>1+</option>
+                        </select>
+                    </div>
+                </div>
             </form>
             <hr>
             <form>

@@ -6,20 +6,33 @@ Here's the link to our Final Project Proposal: [Final Project Proposal](https://
 
 ## How to run our code
 
+1. Running our database
+```
 source setup.sql;
-
 source load-data.sql;
-
 source setup-passwords.sql;
-
 source setup-routines.sql;
-
 source grant-permissions.sql;
-
 source queries.sql;
+```
 
-- `pip3 install requirements.txt`
-- inside webClientInterface, run `flask --app app run`
+2. Running our client-side application
+
+Our client application has been implemented using Python's Flask framework. To run the app, you must install required libraries. Run the following commands (assuming you are at the root directory, CS121FinalProject):
+```
+cd webClientInterface
+```
+if you have Python 3:
+```
+pip3 install requirements.txt
+flask --app app ru
+```
+if you have Python 2:
+```
+pip install requirements.txt
+flask --app app run
+```
+
 
 ## Application Description
 

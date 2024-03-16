@@ -68,9 +68,9 @@ CREATE TABLE store (
     inventory INTEGER NOT NULL,
     PRIMARY KEY (brand_id, product_id),
     FOREIGN KEY (brand_id) REFERENCES brand(brand_id)
-        ON UPDATE CASCADE ON DELETE CASCADE,
+        ON DELETE CASCADE,
     FOREIGN KEY (product_id) REFERENCES product(product_id)
-        ON UPDATE CASCADE ON DELETE CASCADE
+        ON DELETE CASCADE
 );
 
 CREATE TABLE user_info (
