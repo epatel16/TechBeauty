@@ -14,7 +14,7 @@ GRANT EXECUTE ON PROCEDURE cosmeticsdb.sp_change_password TO 'client'@'localhost
 
 GRANT EXECUTE ON PROCEDURE cosmeticsdb.move_cart_to_purchase_history TO 'client'@'localhost';
 GRANT EXECUTE ON PROCEDURE cosmeticsdb.add_item_cart TO 'client'@'localhost';
-GRANT EXECUTE ON TRIGGER cosmeticsdb.after_insert_cart_checkout TO 'client'@'localhost';
+-- GRANT EXECUTE ON TRIGGER cosmeticsdb.after_cart_checkout TO 'client'@'localhost';
 
 
 FLUSH PRIVILEGES;

@@ -1,7 +1,8 @@
 -- UDF
 -- Function to calculate the total value of inventory based on price and quantity
+DELIMITER !
 CREATE FUNCTION calculate_inventory_value(prod_id INTEGER)
-RETURNS DECIMAL
+RETURNS DECIMAL DETERMINISTIC
 BEGIN
     DECLARE totalInventoryPrice DECIMAL(10,2);
 
@@ -10,11 +11,13 @@ BEGIN
     WHERE product_id = prod_id;
 
     RETURN totalInventoryPrice;
-END;
+END !
+DELIMITER ;
 
 -- PROCEDURE
 -- Procedure to update inventory for a specific product in the Store table
 -- This is an admin privelage
+DELIMITER !
 CREATE PROCEDURE update_inventory (
     IN product_id CHAR(5),
     IN new_inventory INTEGER
@@ -23,10 +26,12 @@ BEGIN
     UPDATE store
     SET inventory = new_inventory
     WHERE product_id = product_id;
-END;
+END !
+DELIMITER ;
 
 -- Procedure to remove items from cart for a specific user and add the
 -- info to purchase_history table
+DELIMITER !
 CREATE PROCEDURE move_cart_to_purchase_history(
     IN p_username VARCHAR(20)
 )
@@ -38,10 +43,11 @@ BEGIN
         
     -- Delete items from cart
     DELETE FROM cart WHERE username = p_username;
-END 
-
+END !
+DELIMITER ;
 
 -- Procedure to add item to cart and check that there is enough inventory left
+DELIMITER !
 CREATE PROCEDURE add_item_cart(
     IN p_username VARCHAR(20),
     IN p_product_id INT
@@ -63,17 +69,15 @@ BEGIN
         VALUES (p_username, p_product_id, 1)
         ON DUPLICATE KEY UPDATE num_items = num_items + 1;
     END IF;
-END //
-
+END !
 DELIMITER ;
 
 
 -- TRIGGER
 
--- trigger to update inventory on cart checkout
-DELIMITER //
-
-CREATE TRIGGER after_insert_cart_checkout AFTER INSERT ON cart FOR EACH ROW
+-- trigger to update inventory on user checks out items in their cart
+DELIMITER !
+CREATE TRIGGER after_cart_checkout AFTER INSERT ON cart FOR EACH ROW
 BEGIN
     DECLARE product_id_var INTEGER;
     DECLARE num_items_var SMALLINT;
@@ -88,10 +92,7 @@ BEGIN
     UPDATE store
     SET inventory = inventory - num_items_var
     WHERE product_id = product_id_var;
-END //
-
+END !
 DELIMITER ;
-
-
 
 -- checkout trigger needs to be called before move procedure
