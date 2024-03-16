@@ -1,0 +1,1 @@
+Cosmetics dataset (https://www.kaggle.com/datasets/kingabzpro/cosmetics-datasets), which contains label (type of the product, e.g. moisturizer), brand, name, price, ranking (rating of the product on Sephora), ingredients, and skin preference (Combination, Dry, Oily, Normal).
