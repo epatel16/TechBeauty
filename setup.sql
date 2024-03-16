@@ -133,3 +133,4 @@ CREATE TABLE purchase_history (
         ON DELETE CASCADE
 );
 
+CREATE INDEX index_ptype ON product (product_type);

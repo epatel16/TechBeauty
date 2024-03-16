@@ -37,39 +37,40 @@ WHERE product_name = 'Water Sleeping Mask';
 SELECT product_type, COUNT(*) AS num_products
 FROM product GROUP BY product_type;
 
--- INSERT QUERIES FOR ADMIN
--- Insert data into the brand table for a new brand
-INSERT INTO brand (brand_id, brand_name)
-VALUES (1, 'NewBrand'); -- Replace with the actual brand name
-
--- Insert data into the product table for a new product
-INSERT INTO product (product_id, product_name, product_type, price,
- rating, is_combination, is_dry, is_normal, is_oily, is_sensitive)
-VALUES (
-    1,                
-    'NewProduct',    
-    'Type',           
-    19.99,            
-    4.5,              
-    1,                
-    0,               
-    1,                
-    0,                
-    0              
--- Replace the above values with actual values you want to insert
--- Also add to ingredients table accordingly
-);
-
--- Insert data into the store table for the new product and brand
-INSERT INTO store (brand_id, product_id, inventory)
-VALUES (1, 1, 50); -- Replace with the actual brand_id, product_id, and inventory quantity
-
--- Insert item into cart when user adds 1
-INSERT INTO cart (username, product_id, num_items)
-VALUES ('ejpatel', 100, 1);
-
 -- Gets the ingredients of a given product
 SELECT ingredient_id, ingredient_name
 FROM product NATURAL JOIN has_ingredient
 NATURAL JOIN ingredient WHERE product_id = '100';
 -- change product id to specify which product you want to see ingredients for
+
+-- -- INSERT QUERIES FOR ADMIN
+-- -- Insert data into the brand table for a new brand
+-- INSERT INTO brand (brand_id, brand_name)
+-- VALUES (1, 'NewBrand'); -- Replace with the actual brand name
+
+-- -- Insert data into the product table for a new product
+-- INSERT INTO product (product_id, product_name, product_type, price,
+--  rating, is_combination, is_dry, is_normal, is_oily, is_sensitive)
+-- VALUES (
+--     1,                
+--     'NewProduct',    
+--     'Type',           
+--     19.99,            
+--     4.5,              
+--     1,                
+--     0,               
+--     1,                
+--     0,                
+--     0              
+-- -- Replace the above values with actual values you want to insert
+-- -- Also add to ingredients table accordingly
+-- );
+
+-- -- Insert data into the store table for the new product and brand
+-- INSERT INTO store (brand_id, product_id, inventory)
+-- VALUES (1, 1, 50); -- Replace with the actual brand_id, product_id, and inventory quantity
+
+-- -- Insert item into cart when user adds 1
+-- INSERT INTO cart (username, product_id, num_items)
+-- VALUES ('ejpatel', 100, 1);
+
