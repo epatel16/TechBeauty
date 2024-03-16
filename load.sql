@@ -12,7 +12,7 @@ FIELDS TERMINATED BY ',' ENCLOSED BY '"' LINES TERMINATED BY '\n' IGNORE 1 ROWS;
 
 -- ingredients csv loading
 LOAD DATA LOCAL INFILE 'data/ingredients.csv' INTO TABLE ingredient
-FIELDS TERMINATED BY ',' ENCLOSED BY '"' LINES TERMINATED BY '\n' IGNORE 1 ROWS;
+FIELDS TERMINATED BY ',' ENCLOSED BY '"' LINES TERMINATED BY '\r\n' IGNORE 1 ROWS;
 
 -- has_ingredient csv loading
 LOAD DATA LOCAL INFILE 'data/product_ingredients.csv' INTO TABLE has_ingredient

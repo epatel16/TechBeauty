@@ -57,12 +57,12 @@
                 By Product Type 
               </a>
               <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-                <a class="dropdown-item" href="#">Moisturizer</a>
-                <a class="dropdown-item" href="#">Cleanser</a>
-                <a class="dropdown-item" href="#">Treatment</a>
-                <a class="dropdown-item" href="#">Face Mask</a>
-                <a class="dropdown-item" href="#">Eye Cream</a>
-                <a class="dropdown-item" href="#">Sun Protect</a>
+                <a class="dropdown-item" href={{ url_for('product_type', product_type='Moisturizer') }} >Moisturizer</a>
+                <a class="dropdown-item" href={{ url_for('product_type', product_type='Cleanser') }}>Cleanser</a>
+                <a class="dropdown-item" href={{ url_for('product_type', product_type='Treatment') }}>Treatment</a>
+                <a class="dropdown-item" href={{ url_for('product_type', product_type='Face Mask') }}>Face Mask</a>
+                <a class="dropdown-item" href={{ url_for('product_type', product_type='Eye Cream') }}>Eye Cream</a>
+                <a class="dropdown-item" href={{ url_for('product_type', product_type='Sun Protect') }}>Sun Protect</a>
               </div>
             </li>
           </ul>

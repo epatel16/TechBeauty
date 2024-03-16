@@ -42,6 +42,15 @@ def get_all_brands():
     brand = db.execute(text("SELECT brand_id, brand_name FROM brand ORDER BY brand_name ASC")).fetchall()
     return brand
 
+# execute a MySQL query to get all the ingredients of a given product
+def get_ingredients_of_product(product_id):
+    ingredients = db.execute(text("SELECT ingredient_name FROM has_ingredient \
+                                  NATURAL JOIN ingredient WHERE product_id=%s" % product_id)).fetchall()
+    res = []
+    for ing in ingredients:
+        res.append(ing[0].capitalize())
+    return res
+
 # attempt to authenticate user given username and password, return the result
 def authenticate(username, password) -> bool:
     # execute our pre-loaded MySQL procedure `authenticate`
@@ -177,14 +186,17 @@ def forgot_password():
 @app.route("/products", methods=["POST", "GET"])
 def products():
    product = get_all_products()
-   return render_template("main/products.html", products=product, login=session.get("logged_in"), username=session.get("username"))
+   return render_template("main/products.html", products=product, 
+                          login=session.get("logged_in"), username=session.get("username"))
 
 ## SUBROUTES of Products
 # Detailed information about the selected product
 @app.route("/products/product_id=<product_id>", methods=["GET"])
 def product(product_id):
    result = browse_one_products("WHERE product_id=%s" % product_id)
-   return render_template('main/product.html', product=result, login=session.get("logged_in"), username=session.get('username'))
+   ingredients = get_ingredients_of_product(product_id)
+   return render_template('main/product.html', product=result, ingredients=ingredients,
+                          login=session.get("logged_in"), username=session.get('username'))
 
 # Page to show all brands
 @app.route("/brands", methods=["POST", "GET"])
@@ -205,7 +217,7 @@ def brand(brand_name = None):
     return render_template("main/brand.html", products=prods, login=session.get("logged_in"), username=session.get("username"))
 
 # Search by Product Type
-@app.route("/<product_type>", methods=['GET'])
+@app.route("/product_type/product_type=<product_type>", methods=['GET'])
 def product_type(product_type):
     prods = browse_products('WHERE product_type=\'%s\'' % product_type)
     return render_template("main/products.html", products=prods, login=session.get("logged_in"), username=session.get("username"))
