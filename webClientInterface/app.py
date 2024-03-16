@@ -6,7 +6,7 @@ import sys
 from sqlalchemy import create_engine
 from sqlalchemy.orm import scoped_session, sessionmaker
 from sqlalchemy.sql import text
-
+from sqlalchemy import exc
 
 app = Flask(__name__)
 
@@ -18,8 +18,7 @@ app.config["SESSION_TYPE"] = "filesystem"
 Session(app)
 
 # Set up database
-## TODO: check permissions - client doesn't have access to authenticate procedure
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql://admin:adminpwd@localhost/cosmeticsdb'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql://client:clientpwd@localhost/cosmeticsdb'
 
 # Start MySQL session
 engine = create_engine(app.config['SQLALCHEMY_DATABASE_URI'])
@@ -29,28 +28,7 @@ db = scoped_session(sessionmaker(bind=engine))
 #           Helper Functions           #
 ########################################
 
-# execute a MySQL query to get the list of
-# all available products on the storefront
-def get_all_products():
-    product = db.execute(text("SELECT brand_id, product_id, product_name, brand_name, price, rating FROM product \
-                              NATURAL JOIN store NATURAL JOIN brand ORDER BY product_name ASC")).fetchall()
-    return product
-
-# execute a MySQL query to get the list of all `brand_id`s 
-# and `brand_name`s from database 
-def get_all_brands():
-    brand = db.execute(text("SELECT brand_id, brand_name FROM brand ORDER BY brand_name ASC")).fetchall()
-    return brand
-
-# execute a MySQL query to get all the ingredients of a given product
-def get_ingredients_of_product(product_id):
-    ingredients = db.execute(text("SELECT ingredient_name FROM has_ingredient \
-                                  NATURAL JOIN ingredient WHERE product_id=%s" % product_id)).fetchall()
-    res = []
-    for ing in ingredients:
-        res.append(ing[0].capitalize())
-    return res
-
+###### 1. Helpers for authentication and new user registrations
 # attempt to authenticate user given username and password, return the result
 def authenticate(username, password) -> bool:
     # execute our pre-loaded MySQL procedure `authenticate`
@@ -70,17 +48,60 @@ def authenticate(username, password) -> bool:
 # execute a query to check if the username exists in the database
 def check_username(username) -> bool:
     # select users who have a matching username
-    if db.execute(text("SELECT * FROM user_info WHERE username = :username"), {"username": username}).rowcount != 0:
+    if db.execute(text("SELECT * FROM user_info WHERE username = :username"), 
+                      {"username": username}).rowcount != 0:
         return 1
     else: 
         return 0
+
+###### 2. Helpers for cart
+# execute a procedure to add an item to a cart
+def add_item(product_id):
+    ## execute our pre-loaded MySQL procedure `add_item_cart`
+    add_cart = "CALL add_item_cart(\'%s\', \'%s\');" % (session.get("username"), product_id)
+    try:
+        db.execute(text(add_cart))
+        return 1
+    except exc.DatabaseError as e:
+        return 0
+    
+# get all items in the cart for the user
+def get_cart():
+    items = db.execute(text("SELECT * FROM cart NATURAL JOIN product WHERE username=\'%s\'" % 
+                            session.get("username"))).fetchall()
+    return items
+
+
+####### 3. Helpers for querying products and brands
+# execute a MySQL query to get the list of
+# all available products on the storefront
+def get_all_products():
+    product = db.execute(text("SELECT brand_id, product_id, product_name, brand_name,\
+                               price, rating, inventory FROM product \
+                               NATURAL JOIN store NATURAL JOIN brand ORDER BY product_name ASC")).fetchall()
+    return product
+
+# execute a MySQL query to get the list of all `brand_id`s 
+# and `brand_name`s from database 
+def get_all_brands():
+    brand = db.execute(text("SELECT brand_id, brand_name FROM brand ORDER BY brand_name ASC")).fetchall()
+    return brand
+
+# execute a MySQL query to get all the ingredients of a given product
+def get_ingredients_of_product(product_id):
+    ingredients = db.execute(text("SELECT ingredient_name FROM has_ingredient \
+                                  NATURAL JOIN ingredient WHERE product_id=%s" % product_id)).fetchall()
+    res = []
+    for ing in ingredients:
+        res.append(ing[0].capitalize())
+    return res
 
 # execute a query to get a list of products given the query
 # note that this function is ONLY used for the case where we browse
 # a list of products, for which we will always return same set of
 # attributes 
 def browse_products(sql = ''):
-    sql = 'SELECT product_id, brand_name, product_name, product_type, price, rating FROM product \
+    sql = 'SELECT product_id, brand_name, product_name, product_type, price, rating, inventory FROM product \
             NATURAL JOIN store NATURAL JOIN brand %s;' % sql
     rows = db.execute(text(sql)).fetchall()
     return rows    
@@ -126,14 +147,15 @@ def login():
     if not authenticate(username, password):
         return render_template("auth/login.html", message="Wrong credentials. Try again.",
                                 login=session.get("logged_in"),username=session.get("username"))
+    # set session variables
     else:
         session["logged_in"] = True
         session["username"] = username
         return redirect(url_for('index'))
 
 # When user attemps to log out
-@app.route("/log_out")
-def log_out():
+@app.route("/logout")
+def logout():
     # reset session variables and flush out session
     session["logged_in"] = False
     session["username"] = ""
@@ -222,10 +244,35 @@ def product_type(product_type):
     prods = browse_products('WHERE product_type=\'%s\'' % product_type)
     return render_template("main/products.html", products=prods, login=session.get("logged_in"), username=session.get("username"))
 
+# add to shopping cart
+@app.route("/add_to_cart/product_id=<product_id>", methods=["POST"])
+def add_to_cart(product_id):
+    if request.method == "POST":
+        if add_item(product_id):
+            return redirect(url_for('cart'))
+        else:
+            result = browse_one_products("WHERE product_id=%s" % product_id)
+            ingredients = get_ingredients_of_product(product_id)
+            return render_template('main/product.html', product=result, ingredients=ingredients,
+                                   message="Item cannot be added right now. Item sold out on website!",
+                                   login=session.get("logged_in"), username=session.get('username'))
+    else:
+        return redirect(url_for('cart'))
+
 # check shopping cart
-@app.route("/cart")
+@app.route("/cart", methods=['GET', 'POST'])
 def cart():
-    return None
+    if request.method == "POST":
+        return None
+    else:
+        if session.get("logged_in"):
+            items = get_cart()
+            return render_template('cart/cart.html', cart_items=items, 
+                                    login=session.get("logged_in"), 
+                                    username=session.get('username'))
+        else:
+            return redirect(url_for('login'))
+
 
 # check out items in your cart
 @app.route("/check_out")

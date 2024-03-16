@@ -1,5 +1,6 @@
 -- UDF
 -- Function to calculate the total value of inventory based on price and quantity
+DROP FUNCTION IF EXISTS calculate_inventory_value;
 DELIMITER !
 CREATE FUNCTION calculate_inventory_value(prod_id INTEGER)
 RETURNS DECIMAL DETERMINISTIC
@@ -14,9 +15,26 @@ BEGIN
 END !
 DELIMITER ;
 
+-- Function to calculate the total value of the cart
+DROP FUNCTION IF EXISTS calculate_cart_total;
+DELIMITER !
+CREATE FUNCTION calculate_cart_total(username VARCHAR(20))
+RETURNS DECIMAL DETERMINISTIC
+BEGIN
+    DECLARE totalCartPrice DECIMAL(10,2);
+
+    SELECT SUM(price * num_items) INTO totalCartPrice
+    FROM cart NATURAL JOIN product NATURAL JOIN store
+    WHERE username=username;
+
+    RETURN totalCartPrice;
+END !
+DELIMITER ;
+
 -- PROCEDURE
 -- Procedure to update inventory for a specific product in the Store table
 -- This is an admin privelage
+DROP PROCEDURE IF EXISTS update_inventory;
 DELIMITER !
 CREATE PROCEDURE update_inventory (
     IN product_id CHAR(5),
@@ -31,6 +49,7 @@ DELIMITER ;
 
 -- Procedure to remove items from cart for a specific user and add the
 -- info to purchase_history table
+DROP PROCEDURE IF EXISTS move_cart_to_purchase_history;
 DELIMITER !
 CREATE PROCEDURE move_cart_to_purchase_history(
     IN p_username VARCHAR(20)
@@ -47,6 +66,7 @@ END !
 DELIMITER ;
 
 -- Procedure to add item to cart and check that there is enough inventory left
+DROP PROCEDURE IF EXISTS add_item_cart;
 DELIMITER !
 CREATE PROCEDURE add_item_cart(
     IN p_username VARCHAR(20),
@@ -76,6 +96,7 @@ DELIMITER ;
 -- TRIGGER
 
 -- trigger to update inventory on user checks out items in their cart
+DROP TRIGGER IF EXISTS after_cart_checkout;
 DELIMITER !
 CREATE TRIGGER after_cart_checkout AFTER INSERT ON cart FOR EACH ROW
 BEGIN

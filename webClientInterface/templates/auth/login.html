@@ -24,7 +24,7 @@
                 </div>
                 {% endif %}
                 <form action="{{ url_for('login') }}" class="signin-form" method="post">
-                  <div class="form-group mt-3">
+                <div class="form-group mt-3">
                     <input type="text" class="form-control" name="username" placeholder="username" required>
                   </div>
                 <div class="form-group">
@@ -39,7 +39,7 @@
                     <div class="w-50 text-md-right">
                         <a href="#" id="forgot">Forgot Password</a>
                     </div>
-                    </div>
+                </div>
                 </form>
             <p class="text-center">Not a member? <a href={{ url_for('register') }}>Sign Up</a></p>
         </div>

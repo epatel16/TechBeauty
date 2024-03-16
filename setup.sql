@@ -110,9 +110,9 @@ CREATE TABLE cart (
     num_items    SMALLINT,
     PRIMARY KEY (username, product_id),
     FOREIGN KEY (username) REFERENCES user_info(username)
-        ON UPDATE CASCADE ON DELETE CASCADE,
+        ON DELETE CASCADE,
     FOREIGN KEY (product_id) REFERENCES product(product_id)
-        ON UPDATE CASCADE ON DELETE CASCADE
+        ON DELETE CASCADE
 );
 
 -- Create purchase history table which stores users' previous purchase

@@ -40,10 +40,30 @@
             </a>
           </div>
         <h5>Ingredients</h5>
-        <p>{{ingredients}}</p>
+        <p class="text-justify" style="font-size: 10px;">{{", ".join(ingredients)}}</p>
     </div>
     <div class="col-md-3" id="addToCart">
-        <button class="btn btn-primary">Add to Cart</button>
+      {% if message %}
+      <div class="jumbotron">
+        <p>Item Sold out! Cannot be added to cart.</p>
+      </div>
+      {% endif %}
+      <!--Check if inventory exists-->
+      {% if product.inventory > 0 %}
+        {% if login %}
+        <!--If the user is logged in, they will be able to add the product-->
+        <form method="post" action="{{ url_for('add_to_cart', product_id=product.product_id) }}">
+          <button class="btn btn-primary">Add to Cart</button>
+        </form>
+        {% else %}
+        <!--If the user is not logged in, then they will be redirected to login page-->
+        <form method="post" action="{{ url_for('login') }}}">
+          <button class="btn btn-primary">Add to Cart</button>
+        </form>
+        {% endif %}
+      {% else %}
+        <a class="btn btn-dark" href="#" disabled>Sold Out</a>
+      {% endif %}
     </div>
 </div>
 

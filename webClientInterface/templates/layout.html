@@ -26,9 +26,10 @@
             </button>
         
             <div class="d-flex align-items-center">
-                <a href={{ url_for('cart') }} id="navIcons" style="margin-right:20px"> Cart</a>
                 {% if login %}
-                <a href={{ url_for('mypage') }} id="navIcons">My Page</a>
+                <a href={{ url_for('cart') }} id="navIcons" style="margin-right:20px"> Cart</a>
+                <a href={{ url_for('mypage') }} id="navIcons" style="margin-right:20px">My Page</a>
+                <a href={{ url_for('logout') }} id="navIcons">Sign Out</a>
                 {% else %}
                 <a href={{ url_for('login') }} type="button" class="btn btn-dark me-3">
                   Sign In
