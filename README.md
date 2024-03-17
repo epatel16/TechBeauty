@@ -25,6 +25,7 @@ SOURCE setup-routines.sql;
 SOURCE grant-permissions.sql;
 SOURCE queries.sql;
 ```
+This should be done prior to running any of the applications.
 
 2. Running our client-side application
 
@@ -39,7 +40,7 @@ flask --app app ru
 ```
 if you have Python 2:
 ```
-pip install requirements.txt
+pip install -r requirements.txt
 flask --app app run
 ```
 
@@ -48,6 +49,26 @@ Flask will take a bit of time to load (up to several minutes) when its loading f
 Also, when testing the website, you MUST manually log out of the website before you close. We haven't had a chance to implement flushing sessions on close of the website, so you will remain logged in until you sign out. 
 
 [LINK TO DEMO VIDEO](https://drive.google.com/file/d/15M8fY-DxguPLgQVss1tEQXJ-uzZZRzYS/view?usp=sharing)
+
+Our Client Application is pretty intuitive, since it has a front-end interface. Simply navigate around the website as you normally would on any website!
+
+To enjoy all the functionalities of a user, you must create an account and login.
+
+3. Running our admin-side application
+
+Run the following in your command-line:
+```
+python3 app-admin.py
+```
+
+You can start by using one of the following options:
+- (a) check/update inventory
+- (b) check/update product
+- (c) check/update brand
+- (d) check/update user
+- (e) view statistics
+
+View statistics allows you to choose from viewing inventory/sales statistics.
 
 ### Data
 We obtained our data for the project from Kaggle's [Cosmetics datasets](https://www.kaggle.com/datasets/kingabzpro/cosmetics-datasets), which contains a singular file, cosmetics.csv, that contains the following 11 columns: Label (Product type, e.g. Moisturizer), Brand, Name (of the product), Price, Rank (Rating), Ingredients, Combination (boolean value), Dry (boolean), Normal (boolean), Oily (boolean), and Sensitive (boolean).
