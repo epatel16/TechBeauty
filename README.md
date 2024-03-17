@@ -35,7 +35,6 @@ cd webClientInterface
 ```
 if you have Python 3:
 ```
-python3 -m venv env
 source env/bin/activate
 pip3 install -r requirements.txt
 flask --app app run
