@@ -391,12 +391,21 @@ def product_filter():
     brand = request.form.get('brand')
     product_type = request.form.get('prod_type')
     ingredient = request.form.get('ingredients')
+    price = int(request.form.get('price'))
+    rating = int(request.form.get("rating"))
     # build a string query based on the submitted filters
     sql_query_list = []
     if brand != "-1":
         sql_query_list.append("brand_id=%s" % brand)
     if product_type != "-1":
         sql_query_list.append("product_type=\'%s\'" % product_type)
+    if price != -1:
+        if price == 76:
+            sql_query_list.append("price >= 75")
+        else:
+            sql_query_list.append("price <= %d AND price >= %d" % (price, price - 25))
+    if rating != -1:
+        sql_query_list.append("rating >= %d" % rating)
     sql = "WHERE " + (" AND ".join(sql_query_list))
 
     # ingredient filter must be handled slightly differently
