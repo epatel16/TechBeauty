@@ -32,6 +32,7 @@ This should be done prior to running any of the applications.
 Our client application has been implemented using Python's Flask framework. To run the app, you must install required libraries. Run the following commands (assuming you are at the root directory, CS121FinalProject):
 ```
 cd webClientInterface
+brew install pkg-config
 ```
 if you have Python 3:
 ```
