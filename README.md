@@ -36,7 +36,7 @@ cd webClientInterface
 if you have Python 3:
 ```
 pip3 install -r requirements.txt
-flask --app app ru
+flask --app app run
 ```
 if you have Python 2:
 ```
