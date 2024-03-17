@@ -39,8 +39,24 @@
               <span class="sr-only">Next</span>
             </a>
           </div>
-        <h5>Ingredients</h5>
-        <p class="text-justify" style="font-size: 10px;">{{", ".join(ingredients)}}</p>
+        <div>
+          <h5>Ingredients</h5>
+          <p class="text-justify" style="font-size: 10px;">{{", ".join(ingredients)}}</p>
+        </div>
+        <div>
+          <h5>{{ product.product_name }} is Good For...</h5>
+          {% if product.is_combination %}
+          <h6>Combination skin</h6>
+          {% elif product.is_dry %}
+          <h6>Dry skin</h6>
+          {% elif product.is_normal %}
+          <h6>Normal skin</h6>
+          {% elif product.is_oily %}
+          <h6>Oily skin</h6>
+          {% elif product.is_sensitive %}
+          <h6>Sensitive skin</h6>
+          {% endif %}
+        </div>
     </div>
     <div class="col-md-3" id="addToCart">
       {% if message %}
