@@ -45,6 +45,8 @@ flask --app app run
 
 Flask will take a bit of time to load (up to several minutes) when its loading for the first time. Even if you get a 404 error, wait for a few minutes and retry. We have attached a demo video of our program for those of you who might want to see our project without downloading/running Flask.
 
+Also, when testing the website, you MUST manually log out of the website before you close. We haven't had a chance to implement flushing sessions on close of the website, so you will remain logged in until you sign out. 
+
 [LINK TO DEMO VIDEO](https://drive.google.com/file/d/15M8fY-DxguPLgQVss1tEQXJ-uzZZRzYS/view?usp=sharing)
 
 ### Data
