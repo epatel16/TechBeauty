@@ -4,6 +4,22 @@ For Caltech's CS 121 Final Project, we plan to develop an e-commerce application
 ## :memo: Final Project Proposal :memo:
 Here's the link to our Final Project Proposal: [Final Project Proposal](https://docs.google.com/document/d/1-SiWRTnO7FuUWw8p5J6z06Gr7R1Q0K7K66yuXgOf-pE/edit?usp=sharing)
 
+## :memo: Final Project Reflection :memo:
+[Final Project Reflection](https://docs.google.com/document/d/1Hde-_pKrwx3MjlaA7Wf45lSM-s4AJjjuWSPrywgU4JM/edit?usp=sharing)
+
+## Project Description
+For our CS 121 Final Project, we have worked on creating a cosmetics e-commerce application where the users can browse and purchase items from.
+
+### Data
+We obtained our data for the project from Kaggle's [Cosmetics datasets](https://www.kaggle.com/datasets/kingabzpro/cosmetics-datasets), which contains a singular file, cosmetics.csv, that contains the following 11 columns: Label (Product type, e.g. Moisturizer), Brand, Name (of the product), Price, Rank (Rating), Ingredients, Combination (boolean value), Dry (boolean), Normal (boolean), Oily (boolean), and Sensitive (boolean).
+
+#### Data Cleaning
+Part of our project involved designing an efficient DDL and loading our pre-existing data into our database tables. In order to do so, we have cleaned and pre-processed our data rigorously through either utilizing Excel/Google Sheets or writing a Python Pandas/NumPy program.
+
+1. brands.csv, products.csv
+
+
+
 ## How to run our code
 
 1. Running our database

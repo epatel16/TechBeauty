@@ -11,6 +11,21 @@ SELECT product_name, SUM(inventory) AS total_inventory
 FROM product NATURAL JOIN store
 GROUP BY product_id, product_name;
 
+-- [Relational Algebra 1 in Reflection]
+-- Computes the total value of the inventory for each brand in the store
+SELECT brand_name, SUM(price * inventory)
+AS total_inventory_value FROM brand NATURAL JOIN store 
+NATURAL JOIN product GROUP BY brand_name;
+
+-- [Relational Algebra 2 in Reflection]
+-- returns the information on products that contain ingredients
+-- that match the regex '%beta%' (i.e. they contain beta in their names)
+SELECT product_id, brand_name, product_name
+FROM product NATURAL JOIN (SELECT product_id FROM
+has_ingredient NATURAL JOIN ingredient WHERE
+ingredient_name LIKE '%beta%') AS p NATURAL JOIN store
+NATURAL JOIN brand;
+
 -- Retrieve products with a certain rating range
 SELECT product_name, price, rating FROM product WHERE rating BETWEEN 3.0 AND 4.5;
 
@@ -33,6 +48,7 @@ SELECT username, product_id, product_name, num_items
 FROM user_info NATURAL JOIN cart NATURAL JOIN product
 WHERE product_name = 'Water Sleeping Mask';
 
+-- [Relational Algebra 3 in Reflections]
 -- Get the number of products in each product type
 SELECT product_type, COUNT(*) AS num_products
 FROM product GROUP BY product_type;

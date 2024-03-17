@@ -71,7 +71,6 @@ def execute_query(sql):
     # injection.
     try:
         cursor.execute(sql)
-        # row = cursor.fetchone()
         rows = cursor.fetchall()
         return rows
     except mysql.connector.Error as err:
@@ -80,9 +79,12 @@ def execute_query(sql):
             sys.stderr(err)
             sys.exit(1)
         else:
+            # returns -1 here if the execution of the query fails
+            # so we can handle error separately at the caller
             sys.stderr('Error! Unable to execute SQL query. Check your inputs again.')
             return -1
 
+# used when we have to do .fetchone() instead of .fetchall()
 def execute_query_single(sql):
     cursor = conn.cursor()
     # Remember to pass arguments as a tuple like so to prevent SQL
@@ -97,15 +99,19 @@ def execute_query_single(sql):
             sys.stderr(err)
             sys.exit(1)
         else:
+            # returns -1 here if the execution of the query fails
+            # so we can handle error separately at the caller
             sys.stderr('Error! Unable to execute SQL query. Check your inputs again.')
             return -1
 
-
+# used when we have to commit changes
+# insert/delete/update queries
 def execute_insert_delete_update(sql):
     cursor = conn.cursor()
     # Remember to pass arguments as a tuple like so to prevent SQL
     # injection.
     try:
+        # commit the result, and if successful, return 1
         cursor.execute(sql)
         conn.commit()
         return 1
@@ -115,8 +121,13 @@ def execute_insert_delete_update(sql):
             sys.stderr(err)
             sys.exit(1)
         else:
+            # returns -1 here if the execution of the query fails
+            # so we can handle error separately at the caller
             sys.stderr('Error! Unable to execute SQL query. Check your inputs again.')
             return -1
+
+# Runs the SELECT query to get the list of product_id and
+# product_name from product table with an optional condition
 
 def get_products(cond = ''):
     sql = 'SELECT product_id, product_name FROM product %s;' %cond
@@ -285,30 +296,49 @@ def format_brand_list(brands):
 #     Result formatters     #
 #############################
 
+# Formats the result of SELECT query on product
+# Prints the list of product id and product name
 def format_product_list(products):
+    print("Product ID | Product Name")
     print("-----------------------------------------------------------------------------------------------------------------------------")
     for (product_id, product_name) in products:
-        print(f"{product_id}: {product_name}")
+        print("{product_id:10d}: {product_name:100s}"
+            .format(product_id=product_id, product_name=product_name))
     print("-----------------------------------------------------------------------------------------------------------------------------")
     print()
 
+# Formats the result of SELECT query on the joined
+# table of store and product
+# Prints the list of product id and product name
 def format_store_products(stores):
+    print("Product ID | Product Name")
     print("-----------------------------------------------------------------------------------------------------------------------------")
     for (_, product_id, product_name) in stores:
-        print("{product_id:4d} | {product_name:100s}"
+        print("{product_id:10d} | {product_name:100s}"
             .format(product_id=product_id,product_name=product_name))
     print("-----------------------------------------------------------------------------------------------------------------------------")
     print()
 
+# Formats the result of SELECT query on the joined
+# table of store, product, and brand
+# Prints the list of product names and the
+# names for the corresponding brands
 def format_store(inventory):
+    print("{b:30s} | {name:100s}".format(b="Brand Name", name="Product Name"))
     print("-----------------------------------------------------------------------------------------------------------------------------")
     for (brand_name, product_name, _) in inventory:
-        print("{brand_name:30s} | ${product_name:100s}"
+        print("{brand_name:30s} | {product_name:100s}"
             .format(brand_name=brand_name, product_name=product_name))
     print("-----------------------------------------------------------------------------------------------------------------------------")
     print()
 
+# Formats the result of SELECT query on the joined
+# table of store, product, and brand
+# Prints the list of product names and the
+# names for the corresponding brands
 def format_inventory_res(curr_inventory):
+    print("{b_name:20s} | {p_name:80s} | Inventory"
+          .format(b_name="Brand Name", p_name="Product Name"))
     print("-----------------------------------------------------------------------------------------------------------------------------")
     for (brand_name, product_name, inventory) in curr_inventory:
         print("{brand_name:20s} | {product_name:80s} | {inventory:.0f}"
@@ -316,7 +346,13 @@ def format_inventory_res(curr_inventory):
     print("-----------------------------------------------------------------------------------------------------------------------------")
     print()
 
+# Formats the list of tuples (brand_name, inventory_value)
+# where inventory_value is the total value of inventory
+# owned by each brand, computed by doing
+# inventory (amount of the given product available on store) *
+# the price of each item
 def format_inventory_val(inventory_val):
+    print("{name:30s} | Inventory Value".format(name="Brand Name"))
     print("-----------------------------------------------------------------------------------------------------------------------------")
     for (brand_name, inventory_value) in inventory_val:
         print("{brand_name:30s} | ${inventory_value:.2f}"
@@ -324,7 +360,11 @@ def format_inventory_val(inventory_val):
     print("-----------------------------------------------------------------------------------------------------------------------------")
     print()
 
+# Formats the list of tuples (name, sales_value)
+# where name might be either product_name or brand_name
+# and sales_value is the sum of all products that are sold
 def format_sales(sales):
+    print("{n:100s} | Total Sales Value".format(n="Name"))
     print("-----------------------------------------------------------------------------------------------------------------------------")
     for (name, sales_value) in sales:
         print("{name:100s} | ${sales_value:.2f}"

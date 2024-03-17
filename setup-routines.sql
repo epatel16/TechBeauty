@@ -47,6 +47,7 @@ BEGIN
 END !
 DELIMITER ;
 
+
 -- Procedure to remove items from cart for a specific user and add the
 -- info to purchase_history table
 DROP PROCEDURE IF EXISTS move_cart_to_purchase_history;
