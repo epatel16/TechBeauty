@@ -35,7 +35,7 @@ cd webClientInterface
 ```
 if you have Python 3:
 ```
-pip3 install requirements.txt
+pip3 install -r requirements.txt
 flask --app app ru
 ```
 if you have Python 2:
