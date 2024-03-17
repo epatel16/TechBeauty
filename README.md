@@ -45,7 +45,7 @@ flask --app app run
 
 Flask will take a bit of time to load (up to several minutes) when its loading for the first time. Even if you get a 404 error, wait for a few minutes and retry. We have attached a demo video of our program for those of you who might want to see our project without downloading/running Flask.
 
-[LINK TO DEMO VIDEO]()
+[LINK TO DEMO VIDEO](https://drive.google.com/file/d/15M8fY-DxguPLgQVss1tEQXJ-uzZZRzYS/view?usp=sharing)
 
 ### Data
 We obtained our data for the project from Kaggle's [Cosmetics datasets](https://www.kaggle.com/datasets/kingabzpro/cosmetics-datasets), which contains a singular file, cosmetics.csv, that contains the following 11 columns: Label (Product type, e.g. Moisturizer), Brand, Name (of the product), Price, Rank (Rating), Ingredients, Combination (boolean value), Dry (boolean), Normal (boolean), Oily (boolean), and Sensitive (boolean).

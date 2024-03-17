@@ -266,7 +266,15 @@ def browse_one_products(sql = ''):
 @app.route("/")
 @app.route("/index")
 def index():
-    return render_template("index.html", login = session.get("logged_in",), username = session.get('username'))
+    history = None
+    # should only be accessible when the user is logged in
+    # if not, direct them to the login page
+    if session.get("logged_in"):
+        # get user's purchase history by making a MySQL query
+        history = get_purchase_history()
+
+    return render_template("index.html", history=history, login=session.get("logged_in"), username=session.get("username"))
+    
       
 # Login page
 # POST = when the login request is submitted
