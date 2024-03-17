@@ -35,7 +35,6 @@ cd webClientInterface
 ```
 if you have Python 3:
 ```
-source env/bin/activate
 pip3 install -r requirements.txt
 flask --app app run
 ```
@@ -43,6 +42,11 @@ if you have Python 2:
 ```
 pip install -r requirements.txt
 flask --app app run
+```
+
+If you have issue running, consider running it in virtual environment:
+```
+source env/bin/activate
 ```
 
 Flask will take a bit of time to load (up to several minutes) when its loading for the first time. Even if you get a 404 error, wait for a few minutes and retry. We have attached a demo video of our program for those of you who might want to see our project without downloading/running Flask.
