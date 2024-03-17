@@ -1,0 +1,2 @@
+Link to our Github repo:
+https://github.com/subinkim/CS121FinalProject

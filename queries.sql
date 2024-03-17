@@ -21,10 +21,10 @@ NATURAL JOIN product GROUP BY brand_name;
 -- returns the information on products that contain ingredients
 -- that match the regex '%beta%' (i.e. they contain beta in their names)
 SELECT product_id, brand_name, product_name
-FROM product NATURAL JOIN (SELECT product_id FROM
+FROM brand NATURAL JOIN store NATURAL JOIN product 
+NATURAL JOIN (SELECT product_id FROM
 has_ingredient NATURAL JOIN ingredient WHERE
-ingredient_name LIKE '%beta%') AS p NATURAL JOIN store
-NATURAL JOIN brand;
+ingredient_name LIKE '%beta%') AS p;
 
 -- Retrieve products with a certain rating range
 SELECT product_name, price, rating FROM product WHERE rating BETWEEN 3.0 AND 4.5;
@@ -50,7 +50,7 @@ WHERE product_name = 'Water Sleeping Mask';
 
 -- [Relational Algebra 3 in Reflections]
 -- Get the number of products in each product type
-SELECT product_type, COUNT(*) AS num_products
+SELECT product_type, COUNT(product_id) AS num_products
 FROM product GROUP BY product_type;
 
 -- Gets the ingredients of a given product

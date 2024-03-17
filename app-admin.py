@@ -4,9 +4,9 @@ Student email(s): ejpatel@caltech.edu, subinkim@caltech.edu
 High-level program overview:
 - `app-admin.py` allows the admin user of our service to manage the store.
 - admin user will be allowed to perform following operations:
-1) add or delete product
+1) add or delete product/user/brand
 2) update inventory
-3) 
+3) view relevant statistics
 
 """
 import sys  # to print error messages to sys.stderr
@@ -128,24 +128,31 @@ def execute_insert_delete_update(sql):
 
 # Runs the SELECT query to get the list of product_id and
 # product_name from product table with an optional condition
-
 def get_products(cond = ''):
     sql = 'SELECT product_id, product_name FROM product %s;' %cond
     rows = execute_query(sql)
     return rows
 
+# Runs the SELECT query to get the list of brand info
+# from product table with an optional condition
 def get_brands(cond = ''):
     sql = 'SELECT brand_id, brand_name FROM brand %s;' % cond
     rows = execute_query(sql)
     return rows
 
+# Runs a MySQL query to get the brand_name, product_name and
+# the current inventory count of the corresponding product
 def get_curr_inventory(conds = ''):
     sql = 'SELECT brand_name, product_name, inventory FROM brand \
             JOIN store ON brand.brand_id = store.brand_id \
-            JOIN product ON product.product_id = store.product_id %s;' % conds
+            JOIN product ON product.product_id = store.product_id %s\
+            ORDER BY brand_name ASC;' % conds
     rows = execute_query(sql)
     return rows
 
+# Runs a MySQL query to get the brand_name, the sum of 
+# the total inventory value of each product under that brand
+# (computes the total inventory value for each brand)
 def get_inventory_per_brand(limits = ''):
     sql = 'SELECT brand_name, SUM(calculate_inventory_value(product_id))\
             AS total_inventory_value FROM brand NATURAL JOIN store \
@@ -153,6 +160,8 @@ def get_inventory_per_brand(limits = ''):
     rows = execute_query(sql)
     return rows
 
+# Runs a MySQL query to get brand, product_id, product_name from store
+# given the optional conditions
 def get_curr_store(conds = ''):
     sql = 'SELECT brand_name, product.product_id, \
             product_name FROM product NATURAL JOIN store \
@@ -160,6 +169,7 @@ def get_curr_store(conds = ''):
     rows = execute_query(sql)
     return rows
 
+# Runs a MySQL query to compute the total sales of the entire store
 def get_all_sales():
     sql = 'SELECT SUM(num_items * price) \
             AS total_sales FROM purchase_history AS h \
@@ -167,6 +177,8 @@ def get_all_sales():
     rows = execute_query(sql)
     return rows
 
+# Runs a MySQL query to get the total sales for a brand, given
+# the brand_id
 def get_brand_sales(brand_id):
     sql = 'SELECT brand.brand_name, SUM(num_items * price) \
             AS total_sales FROM purchase_history AS h \
@@ -179,6 +191,8 @@ def get_brand_sales(brand_id):
     rows = execute_query(sql)
     return rows
 
+# Runs a MySQl query to get the total sales for a product, given
+# the product_id
 def get_product_sales(prod_id):
     sql = 'SELECT product.product_name, SUM(num_items * price) \
             AS total_sales FROM purchase_history JOIN product \
@@ -189,6 +203,8 @@ def get_product_sales(prod_id):
     rows = execute_query(sql)
     return rows
 
+# Runs a MySQL query to compute the total sales for all of 
+# the brands on our service
 def get_all_brand_sales():
     sql = 'SELECT brand.brand_name, SUM(num_items * price) \
             AS total_sales FROM purchase_history AS h \
@@ -199,6 +215,8 @@ def get_all_brand_sales():
     rows = execute_query(sql)
     return rows
 
+# Runs a MySQL query to compute the total sales for all of the 
+# products on our service
 def get_all_product_sales():
     sql = 'SELECT product.product_name, SUM(num_items * price) \
             AS total_sales FROM purchase_history JOIN product \
@@ -266,6 +284,7 @@ def get_brand_best_sale(brand_id):
     rows = execute_query(sql)
     return rows
 
+# Get the top 5 best-selling products amongst all brands
 def get_best_selling_product():
     sql = 'SELECT p.product_name, SUM(num_items) AS total_units_sold\
             FROM purchase_history AS h JOIN product AS p ON \
@@ -274,6 +293,8 @@ def get_best_selling_product():
     rows = execute_query(sql)
     return rows
 
+# Get the top 5 best-selling brands, by computing the total units of
+# all products sold under each brand
 def get_best_selling_brand():
     sql = 'SELECT brand_name, SUM(num_items) AS total_units_sold \
             FROM purchase_history AS h NATURAL JOIN product \
@@ -285,45 +306,49 @@ def get_best_selling_brand():
 # ----------------------------------------------------------------------
 # Command-Line Functionality
 # ----------------------------------------------------------------------
-def format_brand_list(brands):
-    print("-----------------------------------------------------------------------------------------------------------------------------")
-    for (brand_id, brand_name) in brands:
-        print(f"{brand_id}: {brand_name}")
-    print("-----------------------------------------------------------------------------------------------------------------------------")
-    print()
 
 #############################
 #     Result formatters     #
 #############################
 
+# Formats a list of brands 
+def format_brand_list(brands):
+    print()
+    print("Brand ID | {bname:100s}".format(bname="Brand Name"))
+    print("-----------------------------------------------------------------------------------------------------------------------------")
+    for (brand_id, brand_name) in brands:
+        print("{brand_id:3d}      | {brand_name:100s}".format(brand_id=brand_id, brand_name=brand_name))
+    print("-----------------------------------------------------------------------------------------------------------------------------")
+    print()
+
 # Formats the result of SELECT query on product
 # Prints the list of product id and product name
 def format_product_list(products):
+    print()
     print("Product ID | Product Name")
     print("-----------------------------------------------------------------------------------------------------------------------------")
     for (product_id, product_name) in products:
-        print("{product_id:10d}: {product_name:100s}"
+        print("{product_id:4d}      | {product_name:100s}"
             .format(product_id=product_id, product_name=product_name))
     print("-----------------------------------------------------------------------------------------------------------------------------")
     print()
 
-# Formats the result of SELECT query on the joined
-# table of store and product
-# Prints the list of product id and product name
+# Formats a list of (brand_id, product_id, product_name)
+# to show product_id and product_name in a nice format
 def format_store_products(stores):
+    print()
     print("Product ID | Product Name")
     print("-----------------------------------------------------------------------------------------------------------------------------")
     for (_, product_id, product_name) in stores:
-        print("{product_id:10d} | {product_name:100s}"
+        print("{product_id:4d}       | {product_name:100s}"
             .format(product_id=product_id,product_name=product_name))
     print("-----------------------------------------------------------------------------------------------------------------------------")
     print()
 
-# Formats the result of SELECT query on the joined
-# table of store, product, and brand
-# Prints the list of product names and the
-# names for the corresponding brands
+# Formats a list of (brand_name, product_name, inventory)
+# to only show the brand_name and product_name in a nice format
 def format_store(inventory):
+    print()
     print("{b:30s} | {name:100s}".format(b="Brand Name", name="Product Name"))
     print("-----------------------------------------------------------------------------------------------------------------------------")
     for (brand_name, product_name, _) in inventory:
@@ -332,11 +357,11 @@ def format_store(inventory):
     print("-----------------------------------------------------------------------------------------------------------------------------")
     print()
 
-# Formats the result of SELECT query on the joined
-# table of store, product, and brand
+# Formats the result of inventory calculation
 # Prints the list of product names and the
 # names for the corresponding brands
 def format_inventory_res(curr_inventory):
+    print()
     print("{b_name:20s} | {p_name:80s} | Inventory"
           .format(b_name="Brand Name", p_name="Product Name"))
     print("-----------------------------------------------------------------------------------------------------------------------------")
@@ -352,6 +377,7 @@ def format_inventory_res(curr_inventory):
 # inventory (amount of the given product available on store) *
 # the price of each item
 def format_inventory_val(inventory_val):
+    print()
     print("{name:30s} | Inventory Value".format(name="Brand Name"))
     print("-----------------------------------------------------------------------------------------------------------------------------")
     for (brand_name, inventory_value) in inventory_val:
@@ -364,6 +390,7 @@ def format_inventory_val(inventory_val):
 # where name might be either product_name or brand_name
 # and sales_value is the sum of all products that are sold
 def format_sales(sales):
+    print()
     print("{n:100s} | Total Sales Value".format(n="Name"))
     print("-----------------------------------------------------------------------------------------------------------------------------")
     for (name, sales_value) in sales:
@@ -372,7 +399,12 @@ def format_sales(sales):
     print("-----------------------------------------------------------------------------------------------------------------------------")
     print()
 
+# Formats the list of tuples (name, num_units)
+# where name might be either product_name or brand_name
+# and num_units is the number of units sold
 def format_sales_units(sales):
+    print()
+    print("{name:100s} | Number of Units Sold".format(name="Name"))
     print("-----------------------------------------------------------------------------------------------------------------------------")
     for (name, num_units) in sales:
         print("{name:100s} | {num_units:.0f}"
@@ -380,15 +412,22 @@ def format_sales_units(sales):
     print("-----------------------------------------------------------------------------------------------------------------------------")
     print()
 
+# Formats the list of tuples (name, num_units, purchase_time)
+# to show recent purchase_histories
 def format_recent_sales(sales):
+    print()
+    print("{name:100s} | Purchase Time | Number of Units".format(name="Name"))
     print("-----------------------------------------------------------------------------------------------------------------------------")
     for (name, num_units, purchase_time) in sales:
-        print("{name:100s} | {num_units:.0f} | {purchase_time}"
+        print("{name:100s} | {purchase_time} | {num_units:.0f} "
             .format(name=name, num_units=num_units, purchase_time=purchase_time))
     print("-----------------------------------------------------------------------------------------------------------------------------")
     print()
 
+# Formats the list of users stored in our database
 def format_user(users):
+    print()
+    print("Username")
     print("-----------------------------------------------------------------------------------------------------------------------------")
     for user in users:
         print("{username:20s} ".format(username=user[0]))
@@ -398,7 +437,9 @@ def format_user(users):
 #############################
 #     Helper functions      #
 #############################
-    
+
+# checks if the given product_id is valid my verifying if a query
+# against product table returns a result
 def product_id_is_valid(product_id):
     if not product_id.isnumeric():
         return format_sales_units
@@ -406,6 +447,8 @@ def product_id_is_valid(product_id):
     rows = execute_query(sql)
     return len(rows) > 0
 
+# checks if the given brand_id is valid my verifying if a query
+# against brand table returns a result
 def brand_id_is_valid(brand_id):
     if not brand_id.isnumeric():
         return format_sales_units
@@ -413,7 +456,12 @@ def brand_id_is_valid(brand_id):
     rows = execute_query(sql)
     return len(rows) > 0
 
+# a Python function that walks the admin user through all the
+# possible options to get the id of the product that they
+# want to reference
 def get_product_id():
+    # helper function to get product_id given the list of
+    # products under a chosen brand_id
     def get_prod_id_from_brand_list():
         ans = input("Enter brand_id: ")
         while not brand_id_is_valid(ans):
@@ -427,6 +475,9 @@ def get_product_id():
             ans = input("Enter your product_id again: ")
         return ans
     
+    # if users know the precise product_id that they want to
+    # choose, then we simply verify that it's a valid id
+    # and return the value
     print("Choose an option")
     print("   (a) I know a precise product_id I want")
     print("   (b) I want to see the list of products")
@@ -437,13 +488,19 @@ def get_product_id():
             print("Your product_id is not valid.")
             ans = input("Enter your product_id again: ")
         return ans
+    # if not, users are presented with an option to see
+    # the list of product_ids for each brand
     elif ans == "b":
         print("What products would you want to see?")
         print("   (a) products of specific brand")
-        print("   (b) full list of products")
+        print("   (b) choose a brand for your product first from full list of products")
         print()
         ans = input("Enter: ").lower()
         if ans == "a":
+            # if users don't know the exact brand_id, they can also
+            # query by inputting part of the name, which will then be
+            # queried to see if there is any brand name that matches
+            # the regex pattern including the useri nput
             print("Do you know the exact brand_id?")
             print("   (y) - yes, I do")
             print("   (n) - maybe, I know part (or all) of the name")
@@ -463,12 +520,16 @@ def get_product_id():
             else:
                 print("Invalid input. Let's retry.")
                 return get_product_id()
+        # full list of brands are presented in groups of 25, so the 
+        # users don't have to scroll through a long list of brands
         elif ans == "b":
             rows = get_brands()
             max_len = len(rows)
             ans = "n"
             range = [0, 25]
             print(f"Brands from id={range[0]+1} to id={range[1]+1}")
+            # continue showing the brands until the user finds the
+            # brand that they were looking for
             while ans == "n" and range[0] < max_len:
                 format_brand_list(rows[range[0]:range[1]])
                 range[0] += 25
@@ -483,6 +544,9 @@ def get_product_id():
         print("Invalid input. Let's retry.")
         return get_product_id()
 
+# a Python function that walks the admin user through all the
+# possible options to get the id of the brand that they
+# want to reference
 def get_brand_id():
     print("Choose an option")
     print("   (a) I know a precise brand_id I want")
@@ -496,16 +560,28 @@ def get_brand_id():
         return ans
     elif ans == "b":
         rows = get_brands()
-        format_brand_list(rows)
-        ans = input("Now, enter a brand_id you want: ")
+        max_len = len(rows)
+        ans = "n"
+        range = [0, 25]
+        print(f"Brands from id={range[0]+1} to id={range[1]+1}")
+        # continue showing the brands until the user finds the
+        # brand that they were looking for
+        while ans == "n" and range[0] < max_len:
+            format_brand_list(rows[range[0]:range[1]])
+            range[0] += 25
+            range[1] += 25
+            ans = input("Would you like to choose from the given list? \
+                        Enter (y) for yes, (n) for no.").lower()
+        ans = input("Enter your brand_id: ")
         while not brand_id_is_valid(ans):
-            print("Your brand_id is not valid.")
-            ans = input("Enter your brand_id again: ")
+            ans = input("Your brand_id is invalid. Try again: ")
         return ans
     else:
         print("Invalid input. Let's try again.")
         return get_brand_id()
 
+# helper function to ask the user for their
+# desired product type filter
 def get_prod_type():
         print("Choose product type")
         print("   (a) Moisturizer")
@@ -527,6 +603,8 @@ def get_prod_type():
         }
         return mapping[prod_type]
 
+# helper function ask the user for their
+# desired skin type filter
 def get_skin_type():
         print("Choose skin type")
         print("   (a) Combination")
@@ -551,36 +629,27 @@ def get_skin_type():
 #############################
 #  (a) Inventory Functions  #
 #############################
-    
+
+# handles the case where the user wants to check the
+# current inventory
 def check_inventory():
     print("What would you want to do?")
-    print('   (a) View all inventory [NOT RECOMMENDED]')
-    print('   (b) View inventory for given product')
-    print('   (c) View inventory for given brand')
+    print('   (a) View inventory for given product')
+    print('   (b) View inventory for given brand')
     print()
     ans = input('Enter an option: ').lower()
-    if ans == 'a':
-        rows = get_curr_inventory()
-        format_inventory_res(rows)
-    elif ans == 'b':
+    if  ans == 'a':
+        # show inventory for chosen product
         prod_id = get_product_id()
-        sql = 'SELECT brand_name, product_name, inventory FROM product \
-                JOIN store ON product.product_id = store.product_id \
-                JOIN brand ON store.brand_id = brand.brand_id WHERE product.product_id=%s;' \
-                % prod_id
-        rows = execute_query(sql)
+        rows = get_curr_inventory(f"WHERE product.product_id={prod_id} ")
         if rows == -1:
             print("Invalid product_id.")
             check_inventory()
         else:
             format_inventory_res(rows)
-    elif ans == 'c':
+    elif ans == 'b':
         brand_id = get_brand_id()
-        sql = 'SELECT brand_name, product_name, inventory FROM product \
-                JOIN store ON product.product_id = store.product_id \
-                JOIN brand ON store.brand_id = brand.brand_id WHERE brand.brand_id=%s;' \
-                % brand_id
-        rows = execute_query(sql)
+        rows = get_curr_inventory(f"WHERE brand.brand_id = {brand_id}")
         if rows == -1:
             print("Invalid brand_id.")
             check_inventory()
@@ -590,6 +659,9 @@ def check_inventory():
         print("INVALID INPUT! Choose from the given options")
         check_inventory()
 
+# handles update inventory event
+# user may either change the inventory of a specific product
+# or change the inventory of all products of a brand
 def update_inventory():
     print("What would you want to do?")
     print("   (a) Update inventory of a product")
@@ -616,8 +688,9 @@ def update_inventory():
         curr_inv = get_curr_inventory('WHERE brand.brand_id=%s' % brand_id)
         print(f"The current inventory of products of {brand_id} is:")
         format_inventory_res(curr_inv)
-        print("How many products would you like to add or subtract?")
+        print("What's the inventory count you would like to add or subtract?")
         new_inv = int(input('Enter a number: '))
+        # user may add to or subtract from the current inventory 
         if new_inv > 0:
             sql = 'UPDATE store SET inventory=inventory+%s WHERE brand_id=%s'\
                     % (new_inv, brand_id)
@@ -634,6 +707,8 @@ def update_inventory():
         print("INVALID INPUT! Choose from the given options")
         update_inventory()
 
+# handler for updating inventory
+# should call relevant functions depending on user choice
 def handle_update_inventory():
     print("What would you want to do?")
     print('   (a) Check inventory')
@@ -652,11 +727,16 @@ def handle_update_inventory():
 #  (b) Product List Funcs   #
 #############################
 
+# get the largest product_id in product table
+# so that we can figure out the product_id for the item we are inserting
 def get_largest_product_id():
     sql = 'SELECT MAX(product_id) FROM product ORDER BY product_id DESC;'
     res = execute_query_single(sql)
     return int(res[0])
 
+# handler for updating product table
+# user may either add more product
+# or delete an existing product from the table
 def handle_update_product():
     print("What would you want to do?")
     print('   (a) Add more products')
@@ -664,6 +744,7 @@ def handle_update_product():
     print()
     ans = input('Enter an option: ').lower()
     if ans == 'a':
+        # user should input all the required attributes for product table
         print("Ok! Then we need the following information from you:")
         name = input("First, enter the name of this new product: ")
         print("Now, what type is this new product?")
@@ -681,12 +762,14 @@ def handle_update_product():
                 {price}, 0.0, {skin_type[0]}, {skin_type[1]}, {skin_type[2]}, \
                 {skin_type[3]}, {skin_type[4]});'
         execute_insert_delete_update(sql)
+        # make sure to update store table as well! since each product is
+        # always linked to a brand
         sql2 = 'INSERT INTO store (product_id, brand_id, inventory) \
                 VALUES (%d, %s, %d);' % (product_id, brand_id, 0)
         execute_insert_delete_update(sql2)
     elif ans == 'b':
+        # get the product_id of the product to delete
         product_id = int(get_product_id())
-        print("hey!")
         print(f"Confirming that you want to delete product with id {product_id}")
         # get user confirmation, since this cannot be undone
         ans = input("Enter (y) for yes, other keys for no: ").lower()
@@ -706,11 +789,17 @@ def handle_update_product():
 #   (c) Brand List Funcs    #
 #############################    
 
+# get the largest brand_id in the brand table
+# so we can figure out the brand_id for the item we
+# are about to insert
 def get_largest_brand_id():
     sql = 'SELECT MAX(brand_id) FROM brand ORDER BY brand_id DESC;'
     res = execute_query_single(sql)
     return int(res[0])
 
+# handler for updating brand event
+# users may either add a new brand
+# or delete an existing brand
 def handle_update_brand():
     print("What would you want to do?")
     print('   (a) Add a brand')
@@ -718,6 +807,7 @@ def handle_update_brand():
     print()
     ans = input('Enter an option: ').lower()
     if ans == 'a':
+        # need brand_name to create a new brand
         print("Ok! Then we need one more piece of information from you:")
         name = input("First, enter the name of this new brand: ")
         brand_id = get_largest_brand_id() + 1
@@ -728,6 +818,7 @@ def handle_update_brand():
         print()
         show_options()
     elif ans == 'b':
+        # id of the brand to be deleted
         brand_id = int(get_brand_id())
         print(f"Confirming that you want to delete brand with id {brand_id}")
         # get user confirmation, since this cannot be undone
@@ -747,6 +838,8 @@ def handle_update_brand():
 #############################
 #    (d) User Info Funcs    #
 #############################
+
+# checks if the username already exists in the user_info table
 def username_exists(username):
     sql = 'SELECT * FROM user_info WHERE username = \'%s\'' % username
     result = execute_query_single(sql)
@@ -754,6 +847,10 @@ def username_exists(username):
         return True
     return False
 
+# handles all user update events
+# should be able to add a user
+# delete an existing user from the table
+# or view the entire list of users for the service
 def handle_update_user():
     print("What would you want to do?")
     print('   (a) Add a user')
@@ -762,6 +859,7 @@ def handle_update_user():
     print()
     ans = input('Enter an option: ').lower()
     if ans == 'a':
+        # get all the necessary fields to call sp_add_user procedure
         print("Ok! Then we need a couple more information from you: ")
         name = input("First, enter username of this new user: ")
         password = input("Now, enter the user's password: ")
@@ -771,6 +869,8 @@ def handle_update_user():
         print()
         show_options()
     elif ans == 'b':
+        # since this is an admin user, we don't require them to be 
+        # authenticated to delete the user from the website
         name = input("Enter username of the user you would like to remove: ")
         while not username_exists(name):
             name = input("Username doesn't exist in our database. Re-enter: ")
@@ -786,6 +886,7 @@ def handle_update_user():
             print()
             show_options()
     elif ans == 'c':
+        # shows the list of all users
         sql = 'SELECT username FROM user_info;'
         rows = execute_query(sql)
         format_user(rows)
@@ -799,6 +900,10 @@ def handle_update_user():
 # (e) Statistics for Admin  #
 #############################
 
+# handles the event of checking inventory value
+# user can either get the total inventory value per brand
+# or see the top 5 brands with the highest or the least
+# remaining in inventory
 def check_inventory_value():
     print("What would you want to do?")
     print('   (a) - Total inventory value per brand')
@@ -842,6 +947,7 @@ def check_sales():
     print()
     ans = input('Enter an option: ').lower()
     if ans == 'a':
+        # handles checking for the total sales event
         print("Would you want to check the total sales of...")
         print("   (a) a brand?")
         print("   (b) a product?")
@@ -875,6 +981,8 @@ def check_sales():
             show_options()
 
     elif ans == 'b':
+        # handles checking for the top selling events
+        # here, top-selling = has generated biggest revenue from sales
         print("Would you want to see the top selling")
         print("   (a) brand?")
         print("   (b) product?")
@@ -902,6 +1010,8 @@ def check_sales():
             show_options()
             
     elif ans == 'c':
+        # handles checking for the best selling events
+        # here best-selling = most number of items sold
         print("Would you want to see the best selling")
         print("   (a) brand?")
         print("   (b) product?")
@@ -933,6 +1043,7 @@ def check_sales():
             show_options()
     
     elif ans == 'd':
+        # handles recent sales events
         print("Would you want to the most recent sales")
         print("   (a) for a brand?")
         print("   (b) for a given product type?")
@@ -979,6 +1090,10 @@ def check_sales():
         print('INVALID INPUT! Retry.')
         handle_view_statistics()
 
+# handler for view statistics events
+# gives two options: 
+#      (1) view inventory statistics
+#      (2) view sales statistics
 def handle_view_statistics():
     print('What statistics would you want to look up?')
     print('   (a) - Inventory')
